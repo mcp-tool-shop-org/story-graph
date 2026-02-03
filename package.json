@@ -1,0 +1,49 @@
+{
+  "name": "storygraph",
+  "version": "0.1.0",
+  "description": "Visual narrative editor for interactive fiction writers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "storygraph": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "cli": "node --loader ts-node/esm src/cli/index.ts"
+  },
+  "keywords": [
+    "interactive-fiction",
+    "visual-novel",
+    "narrative-design",
+    "storytelling",
+    "twine",
+    "ink",
+    "renpy",
+    "game-writing"
+  ],
+  "author": "mcp-tool-shop <64996768+mcp-tool-shop@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcp-tool-shop-org/storygraph.git"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "ts-node": "^10.9.0"
+  }
+}

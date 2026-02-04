@@ -15,6 +15,8 @@ import {
   ValidationError,
   type Issue,
 } from '@storygraph/core';
+import { exportStory, type ExportFormat } from './commands/export.js';
+import { generateGraph } from './commands/graph.js';
 
 // =============================================================================
 // CLI Colors (ANSI)
@@ -85,8 +87,8 @@ async function validate(filePath: string): Promise<number> {
   console.log(color(`\nValidation complete in ${result.durationMs.toFixed(2)}ms`, colors.dim));
   console.log(
     `  ${color(result.counts.error.toString(), colors.red)} errors, ` +
-    `${color(result.counts.warning.toString(), colors.yellow)} warnings, ` +
-    `${color(result.counts.info.toString(), colors.blue)} info`
+      `${color(result.counts.warning.toString(), colors.yellow)} warnings, ` +
+      `${color(result.counts.info.toString(), colors.blue)} info`
   );
 
   if (result.valid) {
@@ -160,9 +162,7 @@ async function create(title: string, outputPath: string): Promise<number> {
     type: 'passage',
     start: true,
     content: 'Your story begins here.\n\nEdit this passage to start writing your narrative.',
-    choices: [
-      { text: 'Continue...', target: 'next' },
-    ],
+    choices: [{ text: 'Continue...', target: 'next' }],
   });
 
   story.setNode({
@@ -247,6 +247,84 @@ async function stats(filePath: string): Promise<number> {
 }
 
 /**
+ * Export a story to various formats.
+ */
+async function runExport(args: string[]): Promise<number> {
+  // Parse arguments
+  const filePath = args.find((a) => !a.startsWith('-'));
+  const formatArg = args.find((a) => a.startsWith('--format='));
+  const outputArg = args.find((a) => a === '-o') ? args[args.indexOf('-o') + 1] : undefined;
+
+  if (!filePath) {
+    console.error(color('Error: Missing file path', colors.red));
+    usage();
+    return 1;
+  }
+
+  if (!formatArg) {
+    console.error(color('Error: Missing --format=<json|html>', colors.red));
+    usage();
+    return 1;
+  }
+
+  const format = formatArg.replace('--format=', '') as ExportFormat;
+  if (!['json', 'html'].includes(format)) {
+    console.error(color(`Error: Unknown format: ${format}. Use json or html.`, colors.red));
+    return 1;
+  }
+
+  try {
+    const result = exportStory(filePath, { format, output: outputArg });
+
+    if (result.outputPath) {
+      console.log(color(`✓ Exported to: ${result.outputPath}`, colors.green));
+    } else {
+      console.log(result.content);
+    }
+
+    return 0;
+  } catch (error) {
+    console.error(color(`Error: ${error instanceof Error ? error.message : error}`, colors.red));
+    return 1;
+  }
+}
+
+/**
+ * Generate a Graphviz DOT graph.
+ */
+async function runGraph(args: string[]): Promise<number> {
+  // Parse arguments
+  const filePath = args.find((a) => !a.startsWith('-'));
+  const outputArg = args.find((a) => a === '-o') ? args[args.indexOf('-o') + 1] : undefined;
+  const layoutArg = args.find((a) => a.startsWith('--layout='));
+  const layout = layoutArg?.replace('--layout=', '') as 'TB' | 'LR' | 'BT' | 'RL' | undefined;
+
+  if (!filePath) {
+    console.error(color('Error: Missing file path', colors.red));
+    usage();
+    return 1;
+  }
+
+  try {
+    const result = generateGraph(filePath, { output: outputArg, layout });
+
+    if (result.outputPath) {
+      console.log(color(`✓ Generated: ${result.outputPath}`, colors.green));
+      console.log(color('\nTo visualize, run:', colors.dim));
+      console.log(`  dot -Tpng ${result.outputPath} -o graph.png`);
+      console.log(`  dot -Tsvg ${result.outputPath} -o graph.svg`);
+    } else {
+      console.log(result.content);
+    }
+
+    return 0;
+  } catch (error) {
+    console.error(color(`Error: ${error instanceof Error ? error.message : error}`, colors.red));
+    return 1;
+  }
+}
+
+/**
  * Print usage information.
  */
 function usage(): void {
@@ -258,14 +336,18 @@ ${color('Usage:', colors.bold)}
   storygraph <command> [options]
 
 ${color('Commands:', colors.bold)}
-  validate <file>         Validate a .story file
-  create <title> <file>   Create a new story file
-  stats <file>            Show statistics for a story
+  validate <file>                     Validate a .story file
+  create <title> <file>               Create a new story file
+  stats <file>                        Show statistics for a story
+  export <file> --format=<fmt> [-o]   Export story (formats: json, html)
+  graph <file> [-o output.dot]        Generate Graphviz DOT file
 
 ${color('Examples:', colors.bold)}
   storygraph validate story.yaml
   storygraph create "My Story" my-story.yaml
   storygraph stats story.yaml
+  storygraph export story.yaml --format=html -o story.html
+  storygraph graph story.yaml -o story.dot
 
 ${color('More info:', colors.dim)}
   https://github.com/mcp-tool-shop-org/storygraph
@@ -317,6 +399,14 @@ async function main(): Promise<void> {
       } else {
         exitCode = await stats(args[1]);
       }
+      break;
+
+    case 'export':
+      exitCode = await runExport(args.slice(1));
+      break;
+
+    case 'graph':
+      exitCode = await runGraph(args.slice(1));
       break;
 
     case 'help':

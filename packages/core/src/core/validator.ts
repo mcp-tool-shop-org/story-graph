@@ -10,7 +10,6 @@
 
 import { Story } from './story.js';
 import { getNodeTargets } from './edges.js';
-import type { StoryNode, PassageNode } from './nodes.js';
 
 // =============================================================================
 // Validation Result Types
@@ -84,6 +83,11 @@ export interface ValidationResult {
  */
 export class Validator {
   private issues: Issue[] = [];
+  private static severityRank: Record<Severity, number> = {
+    error: 0,
+    warning: 1,
+    info: 2,
+  };
 
   constructor(private story: Story) {}
 
@@ -107,15 +111,28 @@ export class Validator {
 
     const end = performance.now();
 
+    const sortedIssues = [...this.issues].sort((a, b) => {
+      const severityDelta =
+        Validator.severityRank[a.severity] - Validator.severityRank[b.severity];
+      if (severityDelta !== 0) return severityDelta;
+      const codeDelta = a.code.localeCompare(b.code);
+      if (codeDelta !== 0) return codeDelta;
+      if (a.nodeId || b.nodeId) {
+        const nodeDelta = (a.nodeId ?? '').localeCompare(b.nodeId ?? '');
+        if (nodeDelta !== 0) return nodeDelta;
+      }
+      return a.message.localeCompare(b.message);
+    });
+
     const counts = {
-      error: this.issues.filter((i) => i.severity === 'error').length,
-      warning: this.issues.filter((i) => i.severity === 'warning').length,
-      info: this.issues.filter((i) => i.severity === 'info').length,
+      error: sortedIssues.filter((i) => i.severity === 'error').length,
+      warning: sortedIssues.filter((i) => i.severity === 'warning').length,
+      info: sortedIssues.filter((i) => i.severity === 'info').length,
     };
 
     return {
       valid: counts.error === 0,
-      issues: [...this.issues],
+      issues: sortedIssues,
       counts,
       durationMs: end - start,
     };

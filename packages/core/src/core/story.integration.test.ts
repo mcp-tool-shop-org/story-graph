@@ -8,7 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 function loadFixture(name: string): string {
-  return readFileSync(resolve(__dirname, '../../../examples', name), 'utf-8');
+  // Examples live in the repo-level examples folder
+  return readFileSync(resolve(__dirname, '../../../../examples', name), 'utf-8');
 }
 
 describe('integration: golden stories', () => {

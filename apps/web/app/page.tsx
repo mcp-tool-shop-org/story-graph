@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Story,
   parseToStory,
@@ -38,24 +38,43 @@ export default function Page(): JSX.Element {
   const [yaml, setYaml] = useState(SAMPLE_STORY);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [parsed, setParsed] = useState<ParsedStory>({ story: null, issues: [] });
+  const runIdRef = useRef(0);
+  const layoutCache = useRef<{ key: string; layout: MapLayout }>({ key: '', layout: { nodes: [], edges: [] } });
 
   useEffect(() => {
+    const runId = ++runIdRef.current;
     const handle = setTimeout(() => {
       try {
         const story = parseToStory(yaml);
         const validation = validateStory(story);
-        setParsed({ story, issues: validation.issues });
+        if (runId === runIdRef.current) {
+          setParsed({ story, issues: validation.issues, parseError: undefined });
+        }
       } catch (err) {
+        if (runId !== runIdRef.current) return;
         const message = err instanceof Error ? err.message : String(err);
         setParsed({ story: null, issues: [], parseError: message });
       }
     }, 200);
 
-    return () => clearTimeout(handle);
+    return () => {
+      clearTimeout(handle);
+    };
   }, [yaml]);
 
   const nodes = useMemo(() => parsed.story?.getAllNodes() ?? [], [parsed.story]);
-  const mapLayout = useMemo(() => buildMapLayout(parsed.story), [parsed.story]);
+  const mapLayout = useMemo(() => {
+    if (!parsed.story) return { nodes: [], edges: [] };
+    const nodeIds = parsed.story.getAllNodeIds().sort();
+    const edgeCount = parsed.story.getEdges().length;
+    const cacheKey = `${nodeIds.join('|')}#${edgeCount}`;
+    if (cacheKey === layoutCache.current.key) {
+      return layoutCache.current.layout;
+    }
+    const layout = buildMapLayout(parsed.story);
+    layoutCache.current = { key: cacheKey, layout };
+    return layout;
+  }, [parsed.story]);
 
   return (
     <main>

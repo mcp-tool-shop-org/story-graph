@@ -13,7 +13,7 @@
   "author": "mcp-tool-shop <64996768+mcp-tool-shop@users.noreply.github.com>",
   "license": "MIT",
   "dependencies": {
-    "@storygraph/core": "workspace:*"
+    "@storygraph/core": "file:../core"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

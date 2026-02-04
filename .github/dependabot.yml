@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "vite"
+      - dependency-name: "vitest"
+      - dependency-name: "esbuild"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -40,5 +40,5 @@ Exporters MAY extend this list; new codes SHOULD be documented.
 
 ## Future Work
 
-- Add exporter matrices (HTML, Twine, EPUB, Ink, Ren'Py) when a built-in exporter is introduced.
+- Add exporter matrices (HTML, EPUB, Ink, Ren'Py) when a built-in exporter is introduced.
 - Register additional warning codes for media, styles, and scripting as exporters land.

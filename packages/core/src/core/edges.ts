@@ -155,7 +155,17 @@ export function extractAllEdges(nodes: Map<string, StoryNode>): Edge[] {
     edges.push(...extractEdgesFromNode(node));
   }
 
-  return edges;
+  return edges.sort((a, b) => {
+    const sourceDelta = a.source.localeCompare(b.source);
+    if (sourceDelta !== 0) return sourceDelta;
+    const targetDelta = a.target.localeCompare(b.target);
+    if (targetDelta !== 0) return targetDelta;
+    const typeDelta = a.type.localeCompare(b.type);
+    if (typeDelta !== 0) return typeDelta;
+    const labelDelta = (a.label ?? '').localeCompare(b.label ?? '');
+    if (labelDelta !== 0) return labelDelta;
+    return (a.branch ?? '').localeCompare(b.branch ?? '');
+  });
 }
 
 /**

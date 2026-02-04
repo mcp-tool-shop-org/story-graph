@@ -153,16 +153,22 @@ export function serializeStory(
 ): string {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
+  // Normalize node ordering
+  const sortedNodes: Record<string, (typeof document.nodes)[string]> = {};
+  for (const key of Object.keys(document.nodes).sort()) {
+    sortedNodes[key] = document.nodes[key];
+  }
+
   // Filter out comment nodes if requested
-  let processedDocument = document;
+  let processedDocument: StoryDocument = { ...document, nodes: sortedNodes };
   if (!opts.includeComments) {
     const filteredNodes: Record<string, (typeof document.nodes)[string]> = {};
-    for (const [id, node] of Object.entries(document.nodes)) {
+    for (const [id, node] of Object.entries(sortedNodes)) {
       if (node.type !== 'comment') {
         filteredNodes[id] = node;
       }
     }
-    processedDocument = { ...document, nodes: filteredNodes };
+    processedDocument = { ...processedDocument, nodes: filteredNodes };
   }
 
   // Custom key sorter for consistent output

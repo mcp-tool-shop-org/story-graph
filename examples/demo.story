@@ -24,6 +24,7 @@ variables:
 nodes:
   start:
     type: passage
+    id: start
     start: true
     content: |
       You stand before an ancient door, its surface carved with symbols
@@ -42,6 +43,7 @@ nodes:
 
   examine_door:
     type: passage
+    id: examine_door
     content: |
       You lean in close, tracing the symbols with your fingertips. They
       tell a story - of guardians who sealed something away, long ago.
@@ -58,6 +60,7 @@ nodes:
 
   push_door:
     type: condition
+    id: push_door
     expression: "has_key"
     notes: "Check if the player found the key"
     ifTrue: door_opens
@@ -65,6 +68,7 @@ nodes:
 
   door_locked:
     type: passage
+    id: door_locked
     content: |
       You push against the door, but it doesn't budge. The ancient
       mechanism holds fast, waiting for its proper key.
@@ -79,6 +83,7 @@ nodes:
 
   search_area:
     type: passage
+    id: search_area
     content: |
       You search the dusty floor, running your hands along the cold
       stone walls. In a small alcove hidden behind a loose brick,
@@ -91,6 +96,7 @@ nodes:
 
   get_key:
     type: variable
+    id: get_key
     set:
       has_key: true
     increment:
@@ -99,6 +105,7 @@ nodes:
 
   try_door_with_key:
     type: passage
+    id: try_door_with_key
     content: |
       With trembling hands, you insert the key into the lock. It fits
       perfectly, as if it had been waiting for this moment.
@@ -112,6 +119,7 @@ nodes:
 
   hesitate:
     type: passage
+    id: hesitate
     content: |
       You pause, key in hand. Some doors, once opened, can never be
       closed again.
@@ -126,6 +134,7 @@ nodes:
 
   door_opens:
     type: passage
+    id: door_opens
     content: |
       The key turns with a satisfying click. Ancient mechanisms grind
       into motion, and slowly, the door swings inward.
@@ -140,6 +149,7 @@ nodes:
 
   garden_ending:
     type: passage
+    id: garden_ending
     ending: true
     content: |
       The garden stretches before you, impossibly vast and beautiful.
@@ -156,6 +166,7 @@ nodes:
 
   leave_ending:
     type: passage
+    id: leave_ending
     ending: true
     content: |
       You remove the key and step back. Some mysteries are better left
@@ -170,6 +181,7 @@ nodes:
 
   author_notes:
     type: comment
+    id: author_notes
     content: |
       This demo story showcases:
       - Passage nodes with choices

@@ -8,7 +8,7 @@ A Windows-first, node-based story design tool with Git-friendly file formats and
 
 ## Vision
 
-StoryGraph bridges the gap between professional narrative design tools (articy:draft, $400+) and beginner-friendly but limited tools (Twine, Ink). It's built for **writers first**, not game developers.
+StoryGraph bridges the gap between professional narrative design tools (articy:draft, $400+) and beginner-friendly but limited tools (Ink and other hobbyist editors). It's built for **writers first**, not game developers.
 
 ### Target Audience
 
@@ -21,12 +21,12 @@ StoryGraph bridges the gap between professional narrative design tools (articy:d
 
 | Pain Point | Current Tools | StoryGraph Solution |
 |------------|---------------|---------------------|
-| **Version control** | Twine uses binary/HTML blobs, hard to diff | YAML-based `.story` format, fully Git-friendly |
+| **Version control** | Legacy HTML-based editors use binary/HTML blobs, hard to diff | YAML-based `.story` format, fully Git-friendly |
 | **Collaboration** | Most tools are single-user | Text files that merge cleanly, conflict markers work |
-| **Export lock-in** | Each tool exports to its own format | Export to Twine, Ink, Ren'Py, HTML, EPUB |
+| **Export lock-in** | Each tool exports to its own format | Export to Ink, Ren'Py, HTML, EPUB |
 | **Cost** | articy:draft is $400+, Visual Novel Maker is $60 | Free and open-source |
 | **Learning curve** | Ren'Py requires Python, Ink has custom syntax | Visual node editor, write prose directly |
-| **Accessibility** | Twine has poor screen reader support | Built-in accessibility from day one |
+| **Accessibility** | Many tools have poor screen reader support | Built-in accessibility from day one |
 
 ---
 
@@ -39,7 +39,7 @@ StoryGraph bridges the gap between professional narrative design tools (articy:d
 - [Arcweave](https://arcweave.com/) - Browser-based, real-time collaboration, freemium, limited export options
 
 **Free/Open-Source:**
-- [Twine](https://twinery.org/) - Most popular, HTML export only, poor version control, save system issues
+- Legacy browser editors - HTML export only, poor version control, save system issues
 - [Ink](https://www.inklestudios.com/ink/) - Powerful scripting, but text-only editor (Inky), requires learning custom syntax
 - [Ren'Py](https://www.renpy.org/) - Visual novel focused, requires Python knowledge, "not-quite-Python" frustrations
 - [StoryFlow Editor](https://storyflow-editor.com/) - Node-based, Git-friendly, but early-stage
@@ -111,7 +111,6 @@ nodes:
 ### Export Targets
 
 - **HTML** - Standalone playable story
-- **Twine** - Import into Twine ecosystem
 - **Ink** - For Unity/Unreal integration
 - **Ren'Py** - Visual novel format
 - **EPUB** - E-book with choice navigation
@@ -153,7 +152,6 @@ nodes:
 *Getting stories out*
 
 - [ ] HTML exporter with themes
-- [ ] Twine format exporter
 - [ ] Ink script exporter
 - [ ] Ren'Py script exporter
 
@@ -179,14 +177,18 @@ nodes:
 - **Testing:** Vitest
 - **Build:** Vite
 
+## Dependency Policy
+
+See [docs/dependency-policy.md](docs/dependency-policy.md) for the current lockfile policy, Node version, overrides, and automated updates.
+
 ---
 
 ## Getting Started
 
 ```bash
 # Clone the repository (workspace layout)
-git clone https://github.com/mcp-tool-shop-org/story-graph.git
-cd story-graph
+git clone https://github.com/mcp-tool-shop-org/StoryGraph.git
+cd StoryGraph
 
 # Install dependencies
 npm install
@@ -223,7 +225,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 Inspired by the incredible work of:
-- [Twine](https://twinery.org/) - Pioneering accessible interactive fiction
+  
 - [Ink](https://www.inklestudios.com/ink/) - Elegant narrative scripting
 - [articy:draft](https://www.articy.com/) - Professional narrative design
 - [Upwelling](https://www.inkandswitch.com/upwelling/) - Version control for writers research

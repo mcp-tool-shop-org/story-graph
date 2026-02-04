@@ -1,9 +1,15 @@
 {
-  "name": "story-graph",
+  "name": "StoryGraph",
   "version": "0.1.0",
   "private": true,
   "description": "Visual narrative editor for interactive fiction writers",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "better-sqlite3": "^11.10.0"
+  },
   "scripts": {
     "build": "npm run build -w @storygraph/core && npm run build -w storygraph-cli",
     "build:core": "npm run build -w @storygraph/core",
@@ -14,15 +20,33 @@
     "dev:web": "npm run dev -w storygraph-web",
     "test": "npm run test -w @storygraph/core",
     "test:run": "npm run test -w @storygraph/core",
+    "test:perf": "vitest run packages/core/src/runtime/runtime.test.ts packages/core/src/core/fuzz.test.ts --reporter=json --outputFile=perf-report.json --runInBand",
+    "perf:report": "node scripts/parse-perf-report.mjs perf-report.json",
+    "ci:perf": "npm run test:perf && npm run perf:report",
+    "smoke:release": "npm test && npm run build && npm run ci:perf",
     "typecheck": "npm run typecheck -w @storygraph/core",
-    "lint": "npm run lint -w @storygraph/core"
+    "lint": "npm run lint -w @storygraph/core",
+    "health": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "vite": "^6.1.7",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mcp-tool-shop-org/story-graph.git"
+    "url": "https://github.com/mcp-tool-shop-org/StoryGraph.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "esbuild": "0.27.2",
+    "vite": {
+      "esbuild": "0.27.2"
+    },
+    "vitest": {
+      "esbuild": "0.27.2"
+    }
+  }
 }

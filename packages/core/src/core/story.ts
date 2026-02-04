@@ -17,7 +17,7 @@ import {
   type VariableValue,
 } from './types.js';
 import { StoryNodeSchema, type StoryNode, type PassageNode } from './nodes.js';
-import { extractAllEdges, getNodeTargets, type Edge } from './edges.js';
+import { extractAllEdges, type Edge } from './edges.js';
 
 // =============================================================================
 // Story Variables Schema
@@ -299,20 +299,26 @@ export class Story {
    */
   toDocument(): StoryDocument {
     const variables: Record<string, VariableValue> = {};
-    for (const [key, value] of this.variables) {
-      variables[key] = value;
+    for (const key of Array.from(this.variables.keys()).sort()) {
+      const value = this.variables.get(key);
+      if (value !== undefined) {
+        variables[key] = value;
+      }
     }
 
     const nodes: Record<string, StoryNode> = {};
-    for (const [id, node] of this.nodes) {
-      nodes[id] = node;
+    for (const id of Array.from(this.nodes.keys()).sort()) {
+      const node = this.nodes.get(id);
+      if (node) {
+        nodes[id] = node;
+      }
     }
 
     return {
       version: this.version,
       meta: {
         ...this.meta,
-        modified: new Date().toISOString(),
+        modified: this.meta.modified ?? this.meta.created,
       },
       variables: Object.keys(variables).length > 0 ? variables : undefined,
       nodes,

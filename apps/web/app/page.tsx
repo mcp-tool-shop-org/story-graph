@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Story } from '@storygraph/core';
 import { parseToStory, validateStory, type Issue, type StoryNode } from '@storygraph/core';
 import { StoryList } from '../components/StoryList';
@@ -65,6 +65,26 @@ export default function Page(): JSX.Element {
   }, [yaml]);
 
   const nodes = useMemo(() => parsed.story?.getAllNodes() ?? [], [parsed.story]);
+
+  // Handle create story
+  const handleCreateStory = useCallback(() => {
+    // TODO: Implement full create story flow with API
+    alert('Create story coming soon! For now, use the Editor Demo tab.');
+  }, []);
+
+  // Keyboard shortcut for create story (Ctrl+N / Cmd+N)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        handleCreateStory();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleCreateStory]);
+
   const mapLayout = useMemo(() => {
     if (!parsed.story) return { nodes: [], edges: [] };
     const nodeIds = parsed.story.getAllNodeIds().sort();
@@ -80,11 +100,22 @@ export default function Page(): JSX.Element {
 
   return (
     <main>
-      <div className="badge">
-        <span>Phase 3</span>
-        <span>Story Management + YAML Editor</span>
-      </div>
-      <h1>StoryGraph Web</h1>
+      <header className="app-header">
+        <div className="app-header-left">
+          <div className="badge">
+            <span>Phase 3</span>
+            <span>Story Management + YAML Editor</span>
+          </div>
+          <h1>StoryGraph Web</h1>
+        </div>
+        <div className="app-header-right">
+          <button onClick={handleCreateStory} className="btn btn-primary create-story-btn">
+            <span className="btn-icon">+</span>
+            New Story
+            <span className="btn-shortcut">⌘N</span>
+          </button>
+        </div>
+      </header>
 
       <nav className="nav-tabs">
         <button
@@ -102,13 +133,7 @@ export default function Page(): JSX.Element {
       </nav>
 
       {activeTab === 'stories' && (
-        <StoryList
-          onCreateStory={() => {
-            // TODO: Implement create story flow
-            alert('Create story coming soon! For now, use the Editor Demo tab.');
-          }}
-          onOpenDemo={() => setActiveTab('editor')}
-        />
+        <StoryList onCreateStory={handleCreateStory} onOpenDemo={() => setActiveTab('editor')} />
       )}
 
       {activeTab === 'editor' && (

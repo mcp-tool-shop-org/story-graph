@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { StoryCard, type StoryCardData } from './StoryCard';
+import { StoryCard, StoryCardSkeleton, type StoryCardData } from './StoryCard';
 
 interface StoryListProps {
   initialStories?: StoryCardData[];
@@ -119,9 +119,10 @@ export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryLi
       )}
 
       {loading && stories.length === 0 && (
-        <div className="story-list-loading">
-          <div className="spinner" />
-          <span>Loading stories...</span>
+        <div className="story-list-grid">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <StoryCardSkeleton key={i} />
+          ))}
         </div>
       )}
 

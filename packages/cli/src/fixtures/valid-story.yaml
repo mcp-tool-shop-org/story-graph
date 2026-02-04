@@ -1,0 +1,25 @@
+version: '1.0'
+meta:
+  title: Test Story
+  author: Test Author
+nodes:
+  start:
+    type: passage
+    id: start
+    start: true
+    content: This is the beginning of the test story.
+    choices:
+      - text: Continue
+        target: middle
+  middle:
+    type: passage
+    id: middle
+    content: This is the middle of the story.
+    choices:
+      - text: End the story
+        target: ending
+  ending:
+    type: passage
+    id: ending
+    ending: true
+    content: The End.

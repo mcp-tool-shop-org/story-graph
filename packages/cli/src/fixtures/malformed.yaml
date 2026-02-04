@@ -1,0 +1,13 @@
+version: '1.0'
+meta:
+  title: Malformed Story
+nodes:
+  start:
+    type: passage
+    id: start
+    start: true
+    content: This YAML is malformed
+      - not properly indented
+    choices:
+      - text: Next
+        target: end

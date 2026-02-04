@@ -1,0 +1,12 @@
+version: '1.0'
+meta:
+  title: Invalid Story
+nodes:
+  start:
+    type: passage
+    id: start
+    start: true
+    content: This story has issues.
+    choices:
+      - text: Go to missing node
+        target: nonexistent

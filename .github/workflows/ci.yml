@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -22,11 +22,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
 
-      - name: Test
-        run: npm test
+      - name: Typecheck (core)
+        run: npm run typecheck -w @storygraph/core
 
-      - name: Build
+      - name: Test with coverage
+        run: npm test -- --coverage
+
+      - name: Build (all packages)
         run: npm run build
+
+      - name: Test CLI
+        run: npm test -w storygraph-cli

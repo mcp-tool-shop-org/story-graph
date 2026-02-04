@@ -1,7 +1,16 @@
 import Database from 'better-sqlite3';
 import { parseToStory, validateStory } from '@storygraph/core';
-import type { StoryRecord, StoryStore, StoryVersion } from '../storage';
+import type {
+  StoryRecord,
+  StoryStore,
+  StoryVersion,
+  StorySearchOptions,
+  StorySearchResult,
+} from '../storage';
 import { enforceLimits } from './limits';
+
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 500;
 
 type Migration = { version: number; up: string };
 
@@ -102,6 +111,63 @@ export class SQLiteStoryStore implements StoryStore {
   list(): StoryRecord[] {
     const rows = this.db.prepare('SELECT * FROM stories ORDER BY createdAt ASC').all();
     return rows.map((r) => ({ ...r }));
+  }
+
+  search(options: StorySearchOptions = {}): StorySearchResult {
+    const limit = Math.min(options.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = options.offset ?? 0;
+    const sort = options.sort ?? '-updatedAt';
+
+    // Build ORDER BY clause
+    let orderBy: string;
+    switch (sort) {
+      case 'createdAt':
+        orderBy = 'createdAt ASC';
+        break;
+      case '-createdAt':
+        orderBy = 'createdAt DESC';
+        break;
+      case 'title':
+        orderBy = 'title ASC';
+        break;
+      case '-title':
+        orderBy = 'title DESC';
+        break;
+      case 'updatedAt':
+        orderBy = 'updatedAt ASC';
+        break;
+      case '-updatedAt':
+      default:
+        orderBy = 'updatedAt DESC';
+        break;
+    }
+
+    let query = 'SELECT * FROM stories';
+    let countQuery = 'SELECT COUNT(*) as total FROM stories';
+    const params: (string | number)[] = [];
+    const countParams: string[] = [];
+
+    // Add title search if query provided
+    if (options.query) {
+      query += ' WHERE title LIKE ?';
+      countQuery += ' WHERE title LIKE ?';
+      const searchPattern = `%${options.query}%`;
+      params.push(searchPattern);
+      countParams.push(searchPattern);
+    }
+
+    query += ` ORDER BY ${orderBy} LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    const rows = this.db.prepare(query).all(...params) as StoryRecord[];
+    const totalRow = this.db.prepare(countQuery).get(...countParams) as { total: number };
+
+    return {
+      stories: rows.map((r) => ({ ...r })),
+      total: totalRow.total,
+      limit,
+      offset,
+    };
   }
 
   get(id: string): StoryRecord | undefined {
@@ -269,9 +335,7 @@ export class SQLiteStoryStore implements StoryStore {
     }
   }
 
-  getIdempotency(
-    key: string
-  ):
+  getIdempotency(key: string):
     | {
         storyId: string;
         versionId: string;

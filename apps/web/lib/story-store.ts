@@ -1,9 +1,17 @@
 import { parseToStory, validateStory } from '@storygraph/core';
-import type { StoryStore, StoryRecord, StoryVersion } from './storage';
+import type {
+  StoryStore,
+  StoryRecord,
+  StoryVersion,
+  StorySearchOptions,
+  StorySearchResult,
+} from './storage';
 import { SQLiteStoryStore } from './persistence/sqlite-story-store';
 import { enforceLimits } from './persistence/limits';
 
 const MAX_VERSIONS = 50;
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 500;
 
 class InMemoryStoryStore implements StoryStore {
   private stories = new Map<string, StoryRecord>();
@@ -11,6 +19,45 @@ class InMemoryStoryStore implements StoryStore {
 
   list(): StoryRecord[] {
     return Array.from(this.stories.values());
+  }
+
+  search(options: StorySearchOptions = {}): StorySearchResult {
+    let results = Array.from(this.stories.values());
+
+    // Filter by query (title search, case-insensitive)
+    if (options.query) {
+      const query = options.query.toLowerCase();
+      results = results.filter((s) => s.title.toLowerCase().includes(query));
+    }
+
+    // Sort
+    const sort = options.sort ?? '-updatedAt';
+    results.sort((a, b) => {
+      switch (sort) {
+        case 'createdAt':
+          return a.createdAt.localeCompare(b.createdAt);
+        case '-createdAt':
+          return b.createdAt.localeCompare(a.createdAt);
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case '-title':
+          return b.title.localeCompare(a.title);
+        case 'updatedAt':
+          return a.updatedAt.localeCompare(b.updatedAt);
+        case '-updatedAt':
+        default:
+          return b.updatedAt.localeCompare(a.updatedAt);
+      }
+    });
+
+    const total = results.length;
+    const limit = Math.min(options.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = options.offset ?? 0;
+
+    // Paginate
+    results = results.slice(offset, offset + limit);
+
+    return { stories: results, total, limit, offset };
   }
 
   get(id: string): StoryRecord | undefined {

@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { parseToStory, validateStory, type Issue } from '@storygraph/core';
+import {
+  parseToStory,
+  validateStory,
+  serializeStoryInstance,
+  type Issue,
+  type Story,
+} from '@storygraph/core';
 import { YamlEditor } from '../../../components/YamlEditor';
 import { ValidationPanel } from '../../../components/ValidationPanel';
 import { ValidationStatusBadge } from '../../../components/ValidationStatusBadge';
 import { WhatsNext } from '../../../components/WhatsNext';
+import { StoryCanvas } from '../../../components/canvas/StoryCanvas';
 
 interface StoryData {
   id: string;
@@ -20,6 +27,7 @@ interface StoryData {
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'conflict';
+type ViewMode = 'yaml' | 'canvas' | 'split';
 
 export default function EditStoryPage() {
   const params = useParams();
@@ -33,6 +41,8 @@ export default function EditStoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [hasChanges, setHasChanges] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('yaml');
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const validationRunRef = useRef(0);
   const latestVersionIdRef = useRef<string | null>(null);
@@ -98,6 +108,36 @@ export default function EditStoryPage() {
       setHasChanges(content !== story.content);
     }
   }, [content, story]);
+
+  // Parse content to Story object for canvas
+  const parsedStory = useMemo((): Story | null => {
+    try {
+      return parseToStory(content);
+    } catch {
+      return null;
+    }
+  }, [content]);
+
+  // Handle position change from canvas
+  const handlePositionChange = useCallback(
+    (nodeId: string, position: { x: number; y: number }) => {
+      if (!parsedStory) return;
+
+      const node = parsedStory.getNode(nodeId);
+      if (!node) return;
+
+      // Update node with new position
+      parsedStory.setNode({
+        ...node,
+        position: { x: Math.round(position.x), y: Math.round(position.y) },
+      });
+
+      // Serialize back to YAML
+      const newYaml = serializeStoryInstance(parsedStory);
+      setContent(newYaml);
+    },
+    [parsedStory]
+  );
 
   // Save story
   const handleSave = useCallback(async () => {
@@ -189,6 +229,31 @@ export default function EditStoryPage() {
           <h1 className="editor-title">{story.title}</h1>
           <span className="editor-version">v{story.version}</span>
         </div>
+        <div className="editor-header-center">
+          <div className="view-mode-toggle">
+            <button
+              onClick={() => setViewMode('yaml')}
+              className={`view-mode-btn ${viewMode === 'yaml' ? 'active' : ''}`}
+              title="YAML Editor"
+            >
+              YAML
+            </button>
+            <button
+              onClick={() => setViewMode('canvas')}
+              className={`view-mode-btn ${viewMode === 'canvas' ? 'active' : ''}`}
+              title="Visual Canvas"
+            >
+              Canvas
+            </button>
+            <button
+              onClick={() => setViewMode('split')}
+              className={`view-mode-btn ${viewMode === 'split' ? 'active' : ''}`}
+              title="Split View"
+            >
+              Split
+            </button>
+          </div>
+        </div>
         <div className="editor-header-right">
           <ValidationStatusBadge
             issues={issues}
@@ -225,15 +290,34 @@ export default function EditStoryPage() {
         </div>
       )}
 
-      <div className="editor-layout">
-        <section className="editor-main">
-          <div className="panel">
-            <header>
-              <h2>YAML Editor</h2>
-              <span className="muted">Press Ctrl+S to save your work</span>
-            </header>
-            <YamlEditor value={content} onChange={setContent} />
-          </div>
+      <div className={`editor-layout ${viewMode === 'split' ? 'editor-layout-split' : ''}`}>
+        <section className={`editor-main ${viewMode === 'canvas' ? 'editor-main-canvas' : ''}`}>
+          {(viewMode === 'yaml' || viewMode === 'split') && (
+            <div className="panel yaml-panel">
+              <header>
+                <h2>YAML Editor</h2>
+                <span className="muted">Press Ctrl+S to save your work</span>
+              </header>
+              <YamlEditor value={content} onChange={setContent} />
+            </div>
+          )}
+
+          {(viewMode === 'canvas' || viewMode === 'split') && (
+            <div className="panel canvas-panel">
+              <header>
+                <h2>Visual Canvas</h2>
+                <span className="muted">Drag nodes to reposition</span>
+              </header>
+              <div className="canvas-container">
+                <StoryCanvas
+                  story={parsedStory}
+                  selectedNodeId={selectedNodeId}
+                  onNodeSelect={setSelectedNodeId}
+                  onPositionChange={handlePositionChange}
+                />
+              </div>
+            </div>
+          )}
         </section>
 
         <aside className="editor-sidebar">

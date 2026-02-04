@@ -1944,3 +1944,169 @@ h3 {
   transform: translateX(4px);
   color: #34d399;
 }
+
+/* View Mode Toggle */
+.editor-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-mode-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(148, 163, 184, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.view-mode-btn {
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.view-mode-btn:hover {
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.view-mode-btn.active {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.view-mode-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px #34d399;
+}
+
+/* Split View Layout */
+.editor-layout-split .editor-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1400px) {
+  .editor-layout-split .editor-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Canvas View */
+.editor-main-canvas .canvas-panel {
+  height: 100%;
+}
+
+.canvas-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-panel header {
+  flex-shrink: 0;
+}
+
+.canvas-container {
+  flex: 1;
+  min-height: 500px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* React Flow Overrides */
+.react-flow {
+  background: #0f172a !important;
+}
+
+.react-flow__background {
+  background: #0f172a !important;
+}
+
+.react-flow__controls {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.react-flow__controls-button {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
+  color: #94a3b8 !important;
+}
+
+.react-flow__controls-button:hover {
+  background: rgba(148, 163, 184, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__minimap {
+  background: #1e293b !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 8px !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #34d399 !important;
+  stroke-width: 3 !important;
+}
+
+.react-flow__handle {
+  width: 10px !important;
+  height: 10px !important;
+  border: 2px solid white !important;
+}
+
+.react-flow__handle-left {
+  left: -5px !important;
+}
+
+.react-flow__handle-right {
+  right: -5px !important;
+}
+
+/* Story Node Styles */
+.story-node {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.story-node:hover {
+  filter: brightness(1.1);
+}
+
+/* YAML Panel in Split View */
+.yaml-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.yaml-panel .yaml-editor-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.yaml-panel .yaml-editor {
+  flex: 1;
+  min-height: 400px;
+}

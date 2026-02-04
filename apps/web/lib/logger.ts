@@ -26,11 +26,11 @@ export type RequestLogFields = {
   method: string;
   status: number;
   durationMs: number;
-  storyId?: string;
-  versionId?: string;
-  tokenHashPrefix?: string;
-  idempotencyHit?: boolean;
-  idempotencyAgeMs?: number;
+  storyId?: string | undefined;
+  versionId?: string | undefined;
+  tokenHashPrefix?: string | undefined;
+  idempotencyHit?: boolean | undefined;
+  idempotencyAgeMs?: number | undefined;
 };
 
 export function getTokenHashPrefix(token?: string | null): string | undefined {
@@ -57,7 +57,7 @@ export function logRequestSummary(fields: RequestLogFields, extra?: LogFields): 
 }
 
 export type RateLimitLogFields = {
-  requestId?: string;
+  requestId?: string | undefined;
   route: string;
   method: string;
   status: number;
@@ -65,10 +65,10 @@ export type RateLimitLogFields = {
   windowMs: number;
   max: number;
   remaining: number;
-  remainingBefore?: number;
-  retryAfterMs?: number;
-  tokenHashPrefix?: string;
-  clientHash?: string;
+  remainingBefore?: number | undefined;
+  retryAfterMs?: number | undefined;
+  tokenHashPrefix?: string | undefined;
+  clientHash?: string | undefined;
 };
 
 export function logRateLimitDenied(fields: RateLimitLogFields): void {
@@ -77,7 +77,7 @@ export function logRateLimitDenied(fields: RateLimitLogFields): void {
 }
 
 export type RateLimitCapLogFields = {
-  requestId?: string;
+  requestId?: string | undefined;
   route: string;
   method: string;
   bucketCount: number;

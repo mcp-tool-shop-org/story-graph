@@ -125,7 +125,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // Parse request body for optional title override
     let title: string | undefined;
     try {
-      const body = await request.json();
+      const body = (await request.json()) as { title?: string };
       if (body && typeof body.title === 'string' && body.title.trim()) {
         title = body.title.trim();
       }

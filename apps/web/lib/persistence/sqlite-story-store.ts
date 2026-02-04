@@ -109,8 +109,10 @@ export class SQLiteStoryStore implements StoryStore {
   }
 
   list(): StoryRecord[] {
-    const rows = this.db.prepare('SELECT * FROM stories ORDER BY createdAt ASC').all();
-    return rows.map((r) => ({ ...r }));
+    const rows = this.db
+      .prepare('SELECT * FROM stories ORDER BY createdAt ASC')
+      .all() as StoryRecord[];
+    return rows;
   }
 
   search(options: StorySearchOptions = {}): StorySearchResult {
@@ -171,14 +173,16 @@ export class SQLiteStoryStore implements StoryStore {
   }
 
   get(id: string): StoryRecord | undefined {
-    const row = this.db.prepare('SELECT * FROM stories WHERE id = ?').get(id);
-    return row ? { ...row } : undefined;
+    const row = this.db.prepare('SELECT * FROM stories WHERE id = ?').get(id) as
+      | StoryRecord
+      | undefined;
+    return row;
   }
 
   create(content: string, title?: string): StoryRecord {
     try {
       const story = parseToStory(content);
-      enforceLimits(content, Object.keys(story.nodes).length);
+      enforceLimits(content, story.nodeCount);
       const id = crypto.randomUUID();
       const now = new Date().toISOString();
       const versionId = crypto.randomUUID();
@@ -231,7 +235,7 @@ export class SQLiteStoryStore implements StoryStore {
         throw err;
       }
       const story = parseToStory(content);
-      enforceLimits(content, Object.keys(story.nodes).length);
+      enforceLimits(content, story.nodeCount);
       const now = new Date().toISOString();
       const nextVersion = existing.version + 1;
       const versionId = crypto.randomUUID();
@@ -300,21 +304,19 @@ export class SQLiteStoryStore implements StoryStore {
   }
 
   listVersions(id: string): StoryVersion[] {
-    const rows = this.db
+    return this.db
       .prepare(
         'SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? ORDER BY version ASC'
       )
-      .all(id);
-    return rows.map((r) => ({ ...r }));
+      .all(id) as StoryVersion[];
   }
 
   getVersion(id: string, versionId: string): StoryVersion | undefined {
-    const row = this.db
+    return this.db
       .prepare(
         'SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? AND versionId = ?'
       )
-      .get(id, versionId);
-    return row ? { ...row } : undefined;
+      .get(id, versionId) as StoryVersion | undefined;
   }
 
   validate(content: string): {

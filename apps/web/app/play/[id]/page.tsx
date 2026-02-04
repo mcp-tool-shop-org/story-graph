@@ -24,7 +24,7 @@ interface SavedGame {
   versionId: string;
 }
 
-export default function PlayPage(): JSX.Element {
+export default function PlayPage() {
   const params = useParams();
   const storyId = params.id as string;
 

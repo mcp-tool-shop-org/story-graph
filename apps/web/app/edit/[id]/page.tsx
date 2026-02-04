@@ -49,7 +49,7 @@ export default function EditStoryPage() {
           return;
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as { story: StoryData };
         setStory(data.story);
         setContent(data.story.content);
         latestVersionIdRef.current = data.story.latestVersionId;
@@ -115,7 +115,7 @@ export default function EditStoryPage() {
         throw new Error(`Save failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { story: StoryData };
       setStory(data.story);
       latestVersionIdRef.current = data.story.latestVersionId;
       setHasChanges(false);

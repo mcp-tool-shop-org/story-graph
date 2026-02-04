@@ -19,13 +19,13 @@ export interface StoryVersion {
 
 export interface StorySearchOptions {
   /** Search query to match against title */
-  query?: string;
+  query?: string | undefined;
   /** Maximum number of results to return (default: 100) */
-  limit?: number;
+  limit?: number | undefined;
   /** Number of results to skip for pagination */
-  offset?: number;
+  offset?: number | undefined;
   /** Sort order: 'createdAt' (oldest first), '-createdAt' (newest first), 'title', '-title', 'updatedAt', '-updatedAt' */
-  sort?: 'createdAt' | '-createdAt' | 'title' | '-title' | 'updatedAt' | '-updatedAt';
+  sort?: 'createdAt' | '-createdAt' | 'title' | '-title' | 'updatedAt' | '-updatedAt' | undefined;
 }
 
 export interface StorySearchResult {

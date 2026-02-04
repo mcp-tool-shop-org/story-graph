@@ -27,12 +27,12 @@ nodes:
 type ParsedStory = {
   story: Story | null;
   issues: Issue[];
-  parseError?: string;
+  parseError?: string | undefined;
 };
 
 type TabId = 'stories' | 'editor';
 
-export default function Page(): JSX.Element {
+export default function Page() {
   const [activeTab, setActiveTab] = useState<TabId>('stories');
   const [yaml, setYaml] = useState(SAMPLE_STORY);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -210,7 +210,7 @@ function NodeList({
   nodes: StoryNode[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-}): JSX.Element {
+}) {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('all');
 
@@ -309,7 +309,7 @@ function GraphMap({
   layout: MapLayout;
   selectedId: string | null;
   onSelect: (id: string) => void;
-}): JSX.Element {
+}) {
   if (layout.nodes.length === 0) {
     return <div className="muted">No nodes to display.</div>;
   }

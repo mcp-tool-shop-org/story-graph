@@ -66,7 +66,7 @@ class InMemoryStoryStore implements StoryStore {
 
   create(content: string, title?: string): StoryRecord {
     const story = parseToStory(content);
-    enforceLimits(content, Object.keys(story.nodes).length);
+    enforceLimits(content, story.nodeCount);
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const versionId = crypto.randomUUID();
@@ -95,7 +95,7 @@ class InMemoryStoryStore implements StoryStore {
       throw err;
     }
     const parsed = parseToStory(content); // validates structure
-    enforceLimits(content, Object.keys(parsed.nodes).length);
+    enforceLimits(content, parsed.nodeCount);
     const now = new Date().toISOString();
     const nextVersion = existing.version + 1;
     const versionId = crypto.randomUUID();

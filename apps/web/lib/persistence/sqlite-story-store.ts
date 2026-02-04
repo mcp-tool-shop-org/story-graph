@@ -57,10 +57,12 @@ export class SQLiteStoryStore implements StoryStore {
   private db: Database.Database;
   private maxVersions: number;
   private idempotencyTtlMs: number;
+  private busyTimeout: number;
 
-  constructor(filename: string, options?: { maxVersions?: number }) {
+  constructor(filename: string, options?: { maxVersions?: number; busyTimeout?: number }) {
     this.db = new Database(filename);
     this.maxVersions = options?.maxVersions ?? 50;
+    this.busyTimeout = options?.busyTimeout ?? 5000;
     this.idempotencyTtlMs = Number(process.env.STORYGRAPH_IDEMPOTENCY_TTL_MS ?? 10 * 60 * 1000);
     this.configurePragmas();
     this.migrate();
@@ -68,7 +70,7 @@ export class SQLiteStoryStore implements StoryStore {
 
   private configurePragmas(): void {
     this.db.pragma('journal_mode = WAL');
-    this.db.pragma('busy_timeout = 5000');
+    this.db.pragma(`busy_timeout = ${this.busyTimeout}`);
     this.db.pragma('foreign_keys = ON');
     this.db.pragma('synchronous = NORMAL');
   }
@@ -280,5 +282,10 @@ export class SQLiteStoryStore implements StoryStore {
       }
     }
     return err as Error;
+  }
+
+  /** Close the database connection. Call this before deleting the database file. */
+  close(): void {
+    this.db.close();
   }
 }

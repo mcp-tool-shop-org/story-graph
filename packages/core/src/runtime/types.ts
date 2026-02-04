@@ -10,15 +10,15 @@ export type RuntimeEvent = {
   code: string;
   message: string;
   severity: 'info' | 'warning' | 'error';
-  nodeId?: string;
-  data?: Record<string, unknown>;
+  nodeId?: string | undefined;
+  data?: Record<string, unknown> | undefined;
 };
 
 export type RuntimeError = {
   code: string;
   message: string;
-  nodeId?: string;
-  data?: Record<string, unknown>;
+  nodeId?: string | undefined;
+  data?: Record<string, unknown> | undefined;
 };
 
 export type RuntimeFrame = {
@@ -37,10 +37,10 @@ export type RuntimeLimits = {
 };
 
 export type RuntimeState = {
-  storyId?: string;
+  storyId?: string | undefined;
   story: import('../core/story.js').Story;
   currentNodeId: string | null;
-  stack: Array<{ returnTo?: string; includeId: string }>;
+  stack: Array<{ returnTo?: string | undefined; includeId: string }>;
   variables: Record<string, VariableValue>;
   visited: Record<string, number>;
   includeDepth: number;

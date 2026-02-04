@@ -16,14 +16,20 @@ nodes:
     content: Hello
 `;
 
-function withStore(testFn: (store: SQLiteStoryStore) => void): void {
+function withStore(testFn: (store: SQLiteStoryStore, dir: string) => void, options?: { busyTimeout?: number }): void {
   const dir = mkdtempSync(join(tmpdir(), 'storygraph-sqlite-'));
   const file = join(dir, 'store.db');
-  const store = new SQLiteStoryStore(file, { maxVersions: 5 });
+  const store = new SQLiteStoryStore(file, { maxVersions: 5, busyTimeout: options?.busyTimeout ?? 5000 });
   try {
-    testFn(store);
+    testFn(store, dir);
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    store.close();
+    // Small delay on Windows to ensure file handles are released
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors in tests
+    }
   }
 }
 
@@ -51,7 +57,7 @@ describe('SQLiteStoryStore', () => {
   it('enforces optimistic concurrency', () => {
     withStore((store) => {
       const created = store.create(SIMPLE_STORY, 'Demo');
-      expect(() => store.save(created.id, SIMPLE_STORY + ' changed', 'wrong-version')).toThrowError(/Version conflict/);
+      expect(() => store.save(created.id, SIMPLE_STORY + '\n# changed', 'wrong-version')).toThrowError(/Version conflict/);
     });
   });
 
@@ -60,7 +66,7 @@ describe('SQLiteStoryStore', () => {
       const created = store.create(SIMPLE_STORY, 'Demo');
       let lastVersionId = created.latestVersionId;
       for (let i = 0; i < 12; i++) {
-        const updated = store.save(created.id, SIMPLE_STORY + ` #${i}`, lastVersionId);
+        const updated = store.save(created.id, SIMPLE_STORY + `\n# iteration ${i}`, lastVersionId);
         lastVersionId = updated.latestVersionId;
       }
       const history = store.listVersions(created.id);
@@ -70,22 +76,27 @@ describe('SQLiteStoryStore', () => {
   });
 
   it('surfaces database locked errors as service unavailable', () => {
-    withStore((store) => {
+    withStore((store, dir) => {
       const created = store.create(SIMPLE_STORY, 'Demo');
-      const dbPath = (store as any).db.name as string;
+      const dbPath = join(dir, 'store.db');
       const other = new Database(dbPath, { timeout: 50 });
-      other.prepare('BEGIN EXCLUSIVE').run();
-      expect(() => store.save(created.id, SIMPLE_STORY + ' locked', created.latestVersionId)).toThrowError(/Database unavailable/);
-      other.prepare('COMMIT').run();
-      other.close();
-    });
+      try {
+        other.prepare('BEGIN EXCLUSIVE').run();
+        expect(() => store.save(created.id, SIMPLE_STORY + '\n# locked', created.latestVersionId)).toThrowError(/Database unavailable/);
+        other.prepare('COMMIT').run();
+      } finally {
+        other.close();
+      }
+    }, { busyTimeout: 100 }); // Short timeout so test doesn't hang waiting for lock
   });
 
   it('persists idempotency keys and prunes expired entries', () => {
     const prev = process.env.STORYGRAPH_IDEMPOTENCY_TTL_MS;
     process.env.STORYGRAPH_IDEMPOTENCY_TTL_MS = '1';
     withStore((store) => {
-      store.saveIdempotency('k1', { storyId: 's1', versionId: 'v1', requestHash: 'hash', requestId: 'req-1' });
+      // Create a real story first so FK constraint is satisfied
+      const story = store.create(SIMPLE_STORY, 'Demo');
+      store.saveIdempotency('k1', { storyId: story.id, versionId: story.latestVersionId, requestHash: 'hash', requestId: 'req-1' });
       const hit = store.getIdempotency('k1');
       expect(hit?.requestHash).toBe('hash');
       // expire and ensure pruning removes record

@@ -5,7 +5,10 @@ type LogFields = Record<string, unknown>;
 function slowThreshold(): number {
   return Number(process.env.STORYGRAPH_SLOW_REQUEST_THRESHOLD_MS ?? 1000);
 }
-const LOG_OPTIONS_DEBUG = process.env.STORYGRAPH_LOG_OPTIONS === 'true';
+
+function logOptionsDebug(): boolean {
+  return process.env.STORYGRAPH_LOG_OPTIONS === 'true';
+}
 
 export function logRequest(event: string, fields?: LogFields): void {
   const payload = { event, ...fields, timestamp: new Date().toISOString() };
@@ -87,7 +90,7 @@ export function logRateLimiterCapped(fields: RateLimitCapLogFields): void {
 }
 
 export function shouldLogOptions(status: number, durationMs: number): boolean {
-  if (LOG_OPTIONS_DEBUG) return true;
+  if (logOptionsDebug()) return true;
   if (status >= 300) return true;
   return durationMs >= slowThreshold();
 }

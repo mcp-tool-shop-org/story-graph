@@ -1,5 +1,5 @@
 import { Story } from '../core/story.js';
-import { parseToStory } from '../core/service.js';
+import { parseToStory } from '../core/serializer.js';
 import type { StoryNode, Choice } from '../core/nodes.js';
 import type { VariableName, VariableValue } from '../core/types.js';
 import type { RuntimeChoice, RuntimeEvent, RuntimeError, RuntimeFrame, RuntimeLimits, RuntimeState } from './types.js';
@@ -10,7 +10,7 @@ const DEFAULT_LIMITS: RuntimeLimits = {
   maxRepeats: 200,
 };
 
-export type RuntimeOptions = Partial<RuntimeLimits> & { storyId?: string };
+export type RuntimeOptions = Partial<RuntimeLimits> & { storyId?: string | undefined };
 
 export function createRuntime(story: Story, options?: RuntimeOptions): RuntimeState {
   return {
@@ -54,7 +54,7 @@ export function choose(state: RuntimeState, targetNodeId: string): RuntimeResult
 export type RuntimeResult = { frame?: RuntimeFrame; error?: RuntimeError };
 export type RuntimeSnapshot = {
   currentNodeId: string | null;
-  stack: Array<{ returnTo?: string; includeId: string }>;
+  stack: Array<{ returnTo?: string | undefined; includeId: string }>;
   variables: Record<string, VariableValue>;
   visited: Record<string, number>;
   includeDepth: number;
@@ -140,8 +140,11 @@ function advance(state: RuntimeState): RuntimeResult {
         state.currentNodeId = next;
         continue;
       }
-      default:
-        return { error: runtimeError('RT999_UNKNOWN', 'Unknown node type', node.id) };
+      default: {
+        // Exhaustiveness check - node.type should be `never` here
+        const _exhaustive: never = node;
+        return { error: runtimeError('RT999_UNKNOWN', `Unknown node type: ${(_exhaustive as StoryNode).type}`) };
+      }
     }
   }
 

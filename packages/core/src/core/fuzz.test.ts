@@ -5,18 +5,20 @@ function randomStory(seed: number): string {
   const nodes: string[] = [];
   const count = 5 + (seed % 5);
   for (let i = 0; i < count; i++) {
-    const id = i === 0 ? 'start' : `n${seed}-${i}`;
-    const next = i < count - 1 ? `n${seed}-${i + 1}` : undefined;
+    const id = i === 0 ? 'start' : `n${seed}_${i}`;
+    const nextId = i < count - 1 ? `n${seed}_${i + 1}` : undefined;
+    const isLast = i === count - 1;
     nodes.push(
       [
         `  ${id}:`,
         '    type: passage',
         `    id: ${id}`,
         i === 0 ? '    start: true' : null,
+        isLast ? '    ending: true' : null,
         `    content: Node ${id}`,
-        next ? '    choices:' : null,
-        next ? `      - text: next ${i}` : null,
-        next ? `        target: ${next}` : null,
+        nextId ? '    choices:' : null,
+        nextId ? `      - text: next ${i}` : null,
+        nextId ? `        target: ${nextId}` : null,
       ]
         .filter(Boolean)
         .join('\n')

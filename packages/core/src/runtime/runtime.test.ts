@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseToStory } from '../core/service.js';
+import { parseToStory } from '../core/serializer.js';
 import { createRuntime, start, choose } from './runtime.js';
 
 const BASE_STORY = `version: "1.0"
@@ -87,11 +87,20 @@ describe('runtime choice gating', () => {
 const VARIABLE_STORY = `version: "1.0"
 meta:
   title: Vars
+variables:
+  score: 0
 nodes:
   start:
-    type: variable
+    type: passage
     id: start
     start: true
+    content: Starting
+    choices:
+      - text: Go
+        target: set_vars
+  set_vars:
+    type: variable
+    id: set_vars
     set:
       score: 1
     increment:
@@ -107,7 +116,8 @@ nodes:
 describe('runtime variable operations', () => {
   it('applies set/increment order', () => {
     const rt = createRuntime(parseToStory(VARIABLE_STORY));
-    const frame = start(rt).frame!;
+    start(rt);
+    const frame = choose(rt, 'set_vars').frame!;
     expect(frame.variables.score).toBe(3);
     expect(frame.nodeId).toBe('pass');
   });
@@ -131,7 +141,13 @@ describe('runtime safety', () => {
   it('halts on repeat limit', () => {
     const rt = createRuntime(parseToStory(LOOP_STORY), { maxRepeats: 3 });
     start(rt);
-    const res = choose(rt, 'start');
+    // After start(), visited[start] = 1
+    // First choose -> visited[start] = 2
+    // Second choose -> visited[start] = 3
+    // Third choose -> visited[start] = 4 > maxRepeats, should error
+    choose(rt, 'start'); // visit 2
+    choose(rt, 'start'); // visit 3
+    const res = choose(rt, 'start'); // visit 4 - should exceed limit
     expect(res.error?.code).toBe('RT010_STEP_LIMIT');
   });
 });
@@ -185,7 +201,7 @@ describe('runtime fuzz traversal', () => {
   it('does not error on random forward graphs', () => {
     for (let seed = 1; seed <= 10; seed++) {
       const story = randomStory(seed, 8);
-      const rt = createRuntime(parseToStory(story), { maxSteps: 200 });
+      const rt = createRuntime(parseToStory(story), { maxAutoSteps: 200 });
       const startFrame = start(rt).frame!;
       let frame = startFrame;
       for (let i = 0; i < 50 && !frame.ending; i++) {

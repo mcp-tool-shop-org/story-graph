@@ -1,14 +1,9 @@
-"use client";
+'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type {
-  Story} from '@storygraph/core';
-import {
-  parseToStory,
-  validateStory,
-  type Issue,
-  type StoryNode,
-} from '@storygraph/core';
+import type { Story } from '@storygraph/core';
+import { parseToStory, validateStory, type Issue, type StoryNode } from '@storygraph/core';
+import { StoryList } from '../components/StoryList';
 
 const SAMPLE_STORY = `version: "1.0"
 meta:
@@ -35,12 +30,18 @@ type ParsedStory = {
   parseError?: string;
 };
 
+type TabId = 'stories' | 'editor';
+
 export default function Page(): JSX.Element {
+  const [activeTab, setActiveTab] = useState<TabId>('stories');
   const [yaml, setYaml] = useState(SAMPLE_STORY);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [parsed, setParsed] = useState<ParsedStory>({ story: null, issues: [] });
   const runIdRef = useRef(0);
-  const layoutCache = useRef<{ key: string; layout: MapLayout }>({ key: '', layout: { nodes: [], edges: [] } });
+  const layoutCache = useRef<{ key: string; layout: MapLayout }>({
+    key: '',
+    layout: { nodes: [], edges: [] },
+  });
 
   useEffect(() => {
     const runId = ++runIdRef.current;
@@ -81,68 +82,89 @@ export default function Page(): JSX.Element {
     <main>
       <div className="badge">
         <span>Phase 3</span>
-        <span>YAML-first editor + live validation</span>
+        <span>Story Management + YAML Editor</span>
       </div>
       <h1>StoryGraph Web</h1>
 
-      <div className="layout">
-        <section className="panel">
-          <header>
-            <h2>YAML Editor</h2>
-            <span className="muted">Live-validated against core schemas</span>
-          </header>
-          <textarea
-            value={yaml}
-            onChange={(e) => setYaml(e.target.value)}
-            spellCheck={false}
-            className="editor"
-          />
-        </section>
+      <nav className="nav-tabs">
+        <button
+          className={`nav-tab ${activeTab === 'stories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('stories')}
+        >
+          My Stories
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'editor' ? 'active' : ''}`}
+          onClick={() => setActiveTab('editor')}
+        >
+          Editor Demo
+        </button>
+      </nav>
 
-        <section className="panel">
-          <header>
-            <h2>Validation</h2>
-            <span className="muted">Parse + structural checks</span>
-          </header>
-          {parsed.parseError ? (
-            <div className="alert error">{parsed.parseError}</div>
-          ) : parsed.issues.length === 0 ? (
-            <div className="alert success">No issues found.</div>
-          ) : (
-            <ul className="issues">
-              {parsed.issues.map((issue) => (
-                <li key={`${issue.code}-${issue.nodeId ?? 'global'}`}>
-                  <span className={`pill ${issue.severity}`}>{issue.severity}</span>
-                  <strong>{issue.code}</strong> {issue.message}
-                  {issue.nodeId ? <span className="muted"> [{issue.nodeId}]</span> : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+      {activeTab === 'stories' && <StoryList />}
 
-      <div className="layout">
-        <section className="panel">
-          <header>
-            <h2>Nodes</h2>
-            <span className="muted">Filter and jump</span>
-          </header>
-          <NodeList
-            nodes={nodes}
-            selectedId={selectedNodeId}
-            onSelect={setSelectedNodeId}
-          />
-        </section>
+      {activeTab === 'editor' && (
+        <>
+          <div className="layout">
+            <section className="panel">
+              <header>
+                <h2>YAML Editor</h2>
+                <span className="muted">Live-validated against core schemas</span>
+              </header>
+              <textarea
+                value={yaml}
+                onChange={(e) => setYaml(e.target.value)}
+                spellCheck={false}
+                className="editor"
+              />
+            </section>
 
-        <section className="panel">
-          <header>
-            <h2>Graph Map</h2>
-            <span className="muted">Read-only layout from start</span>
-          </header>
-          <GraphMap layout={mapLayout} selectedId={selectedNodeId} onSelect={setSelectedNodeId} />
-        </section>
-      </div>
+            <section className="panel">
+              <header>
+                <h2>Validation</h2>
+                <span className="muted">Parse + structural checks</span>
+              </header>
+              {parsed.parseError ? (
+                <div className="alert error">{parsed.parseError}</div>
+              ) : parsed.issues.length === 0 ? (
+                <div className="alert success">No issues found.</div>
+              ) : (
+                <ul className="issues">
+                  {parsed.issues.map((issue) => (
+                    <li key={`${issue.code}-${issue.nodeId ?? 'global'}`}>
+                      <span className={`pill ${issue.severity}`}>{issue.severity}</span>
+                      <strong>{issue.code}</strong> {issue.message}
+                      {issue.nodeId ? <span className="muted"> [{issue.nodeId}]</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          <div className="layout">
+            <section className="panel">
+              <header>
+                <h2>Nodes</h2>
+                <span className="muted">Filter and jump</span>
+              </header>
+              <NodeList nodes={nodes} selectedId={selectedNodeId} onSelect={setSelectedNodeId} />
+            </section>
+
+            <section className="panel">
+              <header>
+                <h2>Graph Map</h2>
+                <span className="muted">Read-only layout from start</span>
+              </header>
+              <GraphMap
+                layout={mapLayout}
+                selectedId={selectedNodeId}
+                onSelect={setSelectedNodeId}
+              />
+            </section>
+          </div>
+        </>
+      )}
     </main>
   );
 }
@@ -161,7 +183,8 @@ function NodeList({
 
   const filtered = useMemo(() => {
     return nodes.filter((node) => {
-      const matchesQuery = query.length === 0 || node.id.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery =
+        query.length === 0 || node.id.toLowerCase().includes(query.toLowerCase());
       const matchesType = type === 'all' || node.type === type;
       return matchesQuery && matchesType;
     });

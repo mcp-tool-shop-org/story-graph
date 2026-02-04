@@ -74,10 +74,50 @@ export default function Page() {
   const nodes = useMemo(() => parsed.story?.getAllNodes() ?? [], [parsed.story]);
 
   // Handle create story
-  const handleCreateStory = useCallback(() => {
-    // TODO: Implement full create story flow with API
-    alert('Coming soon! For now, try the Editor Demo tab to experiment with YAML stories.');
-  }, []);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreateStory = useCallback(async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+
+    const starterContent = `version: "1.0"
+meta:
+  title: "My New Story"
+nodes:
+  start:
+    type: passage
+    start: true
+    content: |
+      Welcome to your new story! Edit this content to begin.
+    choices:
+      - text: "Continue"
+        target: next
+  next:
+    type: passage
+    content: |
+      This is the next part of your story.
+    ending: true
+`;
+
+    try {
+      const response = await fetch('/api/stories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: starterContent, title: 'My New Story' }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create story: ${response.status}`);
+      }
+
+      const data = await response.json();
+      router.push(`/edit/${data.story.id}`);
+    } catch (err) {
+      console.error('Failed to create story:', err);
+      alert('Failed to create story. Please try again.');
+      setIsCreating(false);
+    }
+  }, [isCreating, router]);
 
   // Keyboard shortcut for create story (Ctrl+N / Cmd+N)
   useEffect(() => {
@@ -116,10 +156,14 @@ export default function Page() {
           <h1>StoryGraph Web</h1>
         </div>
         <div className="app-header-right">
-          <button onClick={handleCreateStory} className="btn btn-primary create-story-btn">
-            <span className="btn-icon">+</span>
-            New Story
-            <span className="btn-shortcut">⌘N</span>
+          <button
+            onClick={handleCreateStory}
+            disabled={isCreating}
+            className="btn btn-primary create-story-btn"
+          >
+            <span className="btn-icon">{isCreating ? '...' : '+'}</span>
+            {isCreating ? 'Creating...' : 'New Story'}
+            {!isCreating && <span className="btn-shortcut">⌘N</span>}
           </button>
         </div>
       </header>

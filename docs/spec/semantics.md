@@ -70,6 +70,6 @@ These are not part of v0.1 and exporters MAY refuse or degrade them.
 ## Future Work (tracked)
 
 - Formal cycle validity rules (see graph invariants document).
-- State transition model per exporter (HTML, Twine, etc.).
+- State transition model per exporter (HTML, etc.).
 - Warning/error code registry.
 - Exporter tier mapping reference.

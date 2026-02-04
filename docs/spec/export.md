@@ -1,6 +1,6 @@
 # StoryGraph Export Specification (Draft v0.1)
 
-This document defines export fidelity tiers, warning codes, and guarantees for StoryGraph exporters. Normative language uses MUST/SHOULD/MAY.
+This document defines export fidelity tiers, warning codes, and guarantees for StoryGraph exporters. Normative language uses MUST/SHOULD/MAY. No exporter is currently bundled; this spec remains for future exporters.
 
 ## Export Fidelity Tiers
 
@@ -21,27 +21,8 @@ Warning codes are stable identifiers shared across exporters. Format: `EXP###`.
 - EXP007: Formatting/markup stripped.
 - EXP008: Attachment or media omitted.
 - EXP009: Unknown node type skipped.
-- TWN001: Twine export missing start passage.
-- TWN002: Twine link text normalized/escaped.
-- TWN003: Twine passage name collision after normalization.
 
 Exporters MAY extend this list; new codes SHOULD be documented.
-
-## Feature → Tier Matrix (Twine target, v0.1)
-
-| Feature                         | Tier  | Notes |
-|--------------------------------|-------|-------|
-| Passage content                | 0     | Plain text preserved |
-| Choices (text + target)        | 0     | Targets must exist |
-| Start node                     | 0     | Required |
-| Ending marker                  | 0     | Exported as terminal passage |
-| Comments                       | 1     | Dropped; emit EXP001 |
-| Condition nodes                | 1     | Flattened; emit EXP004 |
-| Variable nodes                 | 1     | Ignored; emit EXP005 |
-| Include nodes                  | 1     | Flattened; emit EXP003 |
-| Tags/notes                     | 1     | Dropped; emit EXP007 |
-| Rich formatting (future)       | 2     | Not supported |
-| Plugins/extended node types    | 2     | Not supported |
 
 ## Guarantees
 
@@ -59,6 +40,5 @@ Exporters MAY extend this list; new codes SHOULD be documented.
 
 ## Future Work
 
-- Add HTML exporter matrix.
-- Add EPUB/Ink/Ren'Py matrices.
-- Register additional warning codes for media, styles, and scripting.
+- Add exporter matrices (HTML, Twine, EPUB, Ink, Ren'Py) when a built-in exporter is introduced.
+- Register additional warning codes for media, styles, and scripting as exporters land.

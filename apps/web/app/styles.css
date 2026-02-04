@@ -3,6 +3,22 @@
   background: #0f172a;
   color: #e2e8f0;
   line-height: 1.6;
+
+  /* Motion tokens */
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 280ms ease;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
@@ -290,11 +306,16 @@ h1 {
   background: rgba(148, 163, 184, 0.08);
   color: #e2e8f0;
   font-size: 14px;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .search-input:focus {
   outline: none;
   border-color: rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
+  background: rgba(148, 163, 184, 0.12);
 }
 
 .sort-select {
@@ -304,6 +325,9 @@ h1 {
   background: rgba(148, 163, 184, 0.08);
   color: #e2e8f0;
   font-size: 14px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast),
+    background var(--transition-fast);
   cursor: pointer;
 }
 
@@ -318,12 +342,22 @@ h1 {
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 12px;
   padding: 16px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition: border-color var(--transition-normal),
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    background var(--transition-normal);
 }
 
 .story-card:hover {
   border-color: rgba(52, 211, 153, 0.4);
   transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.story-card:focus-within {
+  border-color: rgba(52, 211, 153, 0.6);
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
 }
 
 .story-card-header {
@@ -373,7 +407,22 @@ h1 {
   cursor: pointer;
   text-decoration: none;
   border: none;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px #34d399;
 }
 
 .btn:disabled {
@@ -388,6 +437,7 @@ h1 {
 
 .btn-primary:hover:not(:disabled) {
   background: #34d399;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.25);
 }
 
 .btn-secondary {
@@ -398,6 +448,7 @@ h1 {
 
 .btn-secondary:hover:not(:disabled) {
   background: rgba(148, 163, 184, 0.25);
+  border-color: rgba(148, 163, 184, 0.4);
 }
 
 .story-list-loading {
@@ -518,11 +569,23 @@ h1 {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .nav-tab:hover {
   color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.nav-tab:active {
+  transform: scale(0.98);
+}
+
+.nav-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px #34d399;
 }
 
 .nav-tab.active {

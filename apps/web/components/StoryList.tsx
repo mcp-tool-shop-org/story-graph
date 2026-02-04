@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { StoryCard, StoryCardSkeleton, type StoryCardData } from './StoryCard';
+import { WhatsNext } from './WhatsNext';
 
 interface StoryListProps {
   initialStories?: StoryCardData[];
@@ -184,6 +185,8 @@ export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryLi
               </button>
             </div>
           )}
+
+          <WhatsNext context="stories-list" />
         </>
       )}
     </div>

@@ -13,6 +13,7 @@ import {
 } from '@storygraph/core';
 import { VariablePanel } from '../../../components/VariablePanel';
 import { EventLog } from '../../../components/EventLog';
+import { WhatsNext } from '../../../components/WhatsNext';
 import { DEMO_STORY_YAML } from '../../../lib/demo-story';
 
 interface RuntimeEvent {
@@ -288,6 +289,16 @@ export default function DemoPlayPage() {
         <div className="play-sidebar">
           <VariablePanel variables={variables} />
           <EventLog events={eventLog} />
+          {frame && (
+            <WhatsNext
+              context={frame.ending ? 'play-end' : 'play'}
+              storyId="demo"
+              onAction={(action) => {
+                if (action === 'save-game') setShowSaveModal(true);
+                if (action === 'restart') restartGame();
+              }}
+            />
+          )}
         </div>
       </div>
 

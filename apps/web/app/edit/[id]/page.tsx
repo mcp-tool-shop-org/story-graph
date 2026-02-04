@@ -7,6 +7,7 @@ import { parseToStory, validateStory, type Issue } from '@storygraph/core';
 import { YamlEditor } from '../../../components/YamlEditor';
 import { ValidationPanel } from '../../../components/ValidationPanel';
 import { ValidationStatusBadge } from '../../../components/ValidationStatusBadge';
+import { WhatsNext } from '../../../components/WhatsNext';
 
 interface StoryData {
   id: string;
@@ -256,6 +257,15 @@ export default function EditStoryPage() {
               </Link>
             </div>
           </div>
+
+          <WhatsNext
+            context="editor"
+            storyId={storyId}
+            hasChanges={hasChanges}
+            onAction={(action) => {
+              if (action === 'save') handleSave();
+            }}
+          />
         </aside>
       </div>
     </main>

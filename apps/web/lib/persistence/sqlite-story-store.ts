@@ -76,12 +76,20 @@ export class SQLiteStoryStore implements StoryStore {
   }
 
   private migrate(): void {
-    this.db.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, appliedAt TEXT NOT NULL);`);
-    const row = this.db.prepare('SELECT MAX(version) as version FROM schema_migrations').get() as { version: number | null };
+    this.db.exec(
+      `CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, appliedAt TEXT NOT NULL);`
+    );
+    const row = this.db.prepare('SELECT MAX(version) as version FROM schema_migrations').get() as {
+      version: number | null;
+    };
     const current = row?.version ?? 0;
-    const pending = MIGRATIONS.filter((m) => m.version > current).sort((a, b) => a.version - b.version);
+    const pending = MIGRATIONS.filter((m) => m.version > current).sort(
+      (a, b) => a.version - b.version
+    );
     if (pending.length === 0) return;
-    const insert = this.db.prepare('INSERT INTO schema_migrations (version, appliedAt) VALUES (?, ?)');
+    const insert = this.db.prepare(
+      'INSERT INTO schema_migrations (version, appliedAt) VALUES (?, ?)'
+    );
     const tx = this.db.transaction(() => {
       for (const migration of pending) {
         this.db.exec(migration.up);
@@ -208,21 +216,45 @@ export class SQLiteStoryStore implements StoryStore {
     }
   }
 
+  delete(id: string): boolean {
+    try {
+      const existing = this.get(id);
+      if (!existing) {
+        return false;
+      }
+
+      // With foreign keys ON and CASCADE, deleting from stories will also delete versions and idempotency_keys
+      const deleteStory = this.db.prepare('DELETE FROM stories WHERE id = ?');
+      const result = deleteStory.run(id);
+
+      return result.changes > 0;
+    } catch (err) {
+      throw this.mapSqlError(err);
+    }
+  }
+
   listVersions(id: string): StoryVersion[] {
     const rows = this.db
-      .prepare('SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? ORDER BY version ASC')
+      .prepare(
+        'SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? ORDER BY version ASC'
+      )
       .all(id);
     return rows.map((r) => ({ ...r }));
   }
 
   getVersion(id: string, versionId: string): StoryVersion | undefined {
     const row = this.db
-      .prepare('SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? AND versionId = ?')
+      .prepare(
+        'SELECT versionId, version, content, createdAt FROM versions WHERE storyId = ? AND versionId = ?'
+      )
       .get(id, versionId);
     return row ? { ...row } : undefined;
   }
 
-  validate(content: string): { valid: boolean; issues: ReturnType<typeof validateStory>['issues'] } {
+  validate(content: string): {
+    valid: boolean;
+    issues: ReturnType<typeof validateStory>['issues'];
+  } {
     const story = parseToStory(content);
     const result = validateStory(story);
     return { valid: result.valid, issues: result.issues };
@@ -237,10 +269,30 @@ export class SQLiteStoryStore implements StoryStore {
     }
   }
 
-  getIdempotency(key: string): { storyId: string; versionId: string; requestHash: string; createdAt: string; requestId?: string } | undefined {
+  getIdempotency(
+    key: string
+  ):
+    | {
+        storyId: string;
+        versionId: string;
+        requestHash: string;
+        createdAt: string;
+        requestId?: string;
+      }
+    | undefined {
     const row = this.db
-      .prepare('SELECT storyId, versionId, requestHash, createdAt, requestId FROM idempotency_keys WHERE key = ?')
-      .get(key) as { storyId: string; versionId: string; requestHash: string; createdAt: string; requestId?: string } | undefined;
+      .prepare(
+        'SELECT storyId, versionId, requestHash, createdAt, requestId FROM idempotency_keys WHERE key = ?'
+      )
+      .get(key) as
+      | {
+          storyId: string;
+          versionId: string;
+          requestHash: string;
+          createdAt: string;
+          requestId?: string;
+        }
+      | undefined;
     if (!row) return undefined;
     const expired = Date.now() - new Date(row.createdAt).getTime() > this.idempotencyTtlMs;
     if (expired) {
@@ -250,7 +302,10 @@ export class SQLiteStoryStore implements StoryStore {
     return row;
   }
 
-  saveIdempotency(key: string, payload: { storyId: string; versionId: string; requestHash: string; requestId?: string }): void {
+  saveIdempotency(
+    key: string,
+    payload: { storyId: string; versionId: string; requestHash: string; requestId?: string }
+  ): void {
     const insert = this.db.prepare(
       `INSERT INTO idempotency_keys (key, storyId, versionId, requestHash, createdAt, requestId)
        VALUES (@key, @storyId, @versionId, @requestHash, @createdAt, @requestId)

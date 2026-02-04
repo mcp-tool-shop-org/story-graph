@@ -22,6 +22,7 @@ export interface StoryStore {
   get(id: string): StoryRecord | undefined;
   create(content: string, title?: string): StoryRecord;
   save(id: string, content: string, expectedVersionId?: string): StoryRecord;
+  delete(id: string): boolean;
   listVersions(id: string): StoryVersion[];
   getVersion(id: string, versionId: string): StoryVersion | undefined;
   validate(content: string): { valid: boolean; issues: Issue[] };

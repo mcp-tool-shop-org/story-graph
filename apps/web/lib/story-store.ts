@@ -69,6 +69,15 @@ class InMemoryStoryStore implements StoryStore {
     return updated;
   }
 
+  delete(id: string): boolean {
+    const existed = this.stories.has(id);
+    if (existed) {
+      this.stories.delete(id);
+      this.versions.delete(id);
+    }
+    return existed;
+  }
+
   listVersions(id: string): StoryVersion[] {
     return this.versions.get(id) ?? [];
   }
@@ -77,7 +86,10 @@ class InMemoryStoryStore implements StoryStore {
     return (this.versions.get(id) ?? []).find((v) => v.versionId === versionId);
   }
 
-  validate(content: string): { valid: boolean; issues: ReturnType<typeof validateStory>['issues'] } {
+  validate(content: string): {
+    valid: boolean;
+    issues: ReturnType<typeof validateStory>['issues'];
+  } {
     const story = parseToStory(content);
     const result = validateStory(story);
     return { valid: result.valid, issues: result.issues };

@@ -44,9 +44,72 @@ main {
   backdrop-filter: blur(8px);
 }
 
+/* Typography Scale */
 h1 {
   margin-top: 0;
-  letter-spacing: -0.02em;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Text hierarchy */
+.text-primary {
+  color: #f8fafc;
+}
+
+.text-secondary {
+  color: #e2e8f0;
+}
+
+.text-muted {
+  color: #94a3b8;
+}
+
+.text-subtle {
+  color: #64748b;
+}
+
+.text-accent {
+  color: #34d399;
+}
+
+/* Font sizes */
+.text-sm {
+  font-size: 13px;
+}
+
+.text-xs {
+  font-size: 12px;
+}
+
+.text-lg {
+  font-size: 18px;
+}
+
+/* Weights */
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 
 /* App Header */
@@ -135,7 +198,17 @@ h1 {
 
 .muted {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Labels and metadata */
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
 }
 
 .editor {

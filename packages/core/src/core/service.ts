@@ -1,6 +1,6 @@
 import type { Edge } from './edges.js';
 import type { StoryVariables } from './story.js';
-import { Story } from './story.js';
+import type { Story } from './story.js';
 import type {
   FormatVersion,
   NodeId,

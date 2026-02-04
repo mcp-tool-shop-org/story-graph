@@ -1,5 +1,4 @@
 import { Buffer } from 'node:buffer';
-import { NextResponse } from 'next/server';
 import { errorResponse } from './http';
 import { getHashPrefix, getTokenHashPrefix, logRateLimitDenied, logRateLimiterCapped } from './logger';
 
@@ -81,7 +80,7 @@ export async function parseJsonWithLimit(request: Request, requestId?: string): 
   }
   try {
     return JSON.parse(raw || '{}');
-  } catch (err) {
+  } catch (_err) {
     return errorResponse('invalid_json', 'Invalid JSON', 400, undefined, requestId);
   }
 }

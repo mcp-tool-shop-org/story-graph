@@ -50,7 +50,7 @@ async function validate(filePath: string): Promise<number> {
   let content: string;
   try {
     content = fs.readFileSync(filePath, 'utf-8');
-  } catch (error) {
+  } catch (_error) {
     console.error(color(`Error: Cannot read file: ${filePath}`, colors.red));
     return 1;
   }
@@ -188,7 +188,7 @@ async function create(title: string, outputPath: string): Promise<number> {
   // Write file
   try {
     fs.writeFileSync(outputPath, yaml, 'utf-8');
-  } catch (error) {
+  } catch (_error) {
     console.error(color(`Error: Cannot write file: ${outputPath}`, colors.red));
     return 1;
   }

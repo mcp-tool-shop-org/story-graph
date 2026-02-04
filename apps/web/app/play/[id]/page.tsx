@@ -14,7 +14,6 @@ export default function PlayPage({ params }: { params: { id: string } }): JSX.El
 
   useEffect(() => {
     startGame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   async function startGame() {

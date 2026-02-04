@@ -25,10 +25,19 @@
     "ci:perf": "npm run test:perf && npm run perf:report",
     "smoke:release": "npm test && npm run build && npm run ci:perf",
     "typecheck": "npm run typecheck -w @storygraph/core",
-    "lint": "npm run lint -w @storygraph/core",
+    "lint": "eslint \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\"",
     "health": "npm run typecheck && npm test && npm run build"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^17.3.0",
+    "prettier": "^3.4.0",
     "vite": "^6.1.7",
     "vitest": "^4.0.18"
   },

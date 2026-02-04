@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  Story} from '@storygraph/core';
 import {
-  Story,
   parseToStory,
   validateStory,
   type Issue,
@@ -144,21 +145,6 @@ export default function Page(): JSX.Element {
       </div>
     </main>
   );
-}
-
-function useFilteredNodes(nodes: StoryNode[], selectedId: string | null): StoryNode[] {
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState<string>('all');
-
-  const filtered = useMemo(() => {
-    return nodes.filter((node) => {
-      const matchesQuery = query.length === 0 || node.id.toLowerCase().includes(query.toLowerCase());
-      const matchesType = type === 'all' || node.type === type;
-      return matchesQuery && matchesType;
-    });
-  }, [nodes, query, type]);
-
-  return Object.assign(filtered, { query, setQuery, type, setType, selectedId });
 }
 
 function NodeList({

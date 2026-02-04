@@ -8,7 +8,7 @@
  * - Best practices (naming, content)
  */
 
-import { Story } from './story.js';
+import type { Story } from './story.js';
 import { getNodeTargets } from './edges.js';
 
 // =============================================================================

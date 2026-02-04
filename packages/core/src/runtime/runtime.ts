@@ -1,4 +1,4 @@
-import { Story } from '../core/story.js';
+import type { Story } from '../core/story.js';
 import { parseToStory } from '../core/serializer.js';
 import type { StoryNode, Choice } from '../core/nodes.js';
 import type { VariableName, VariableValue } from '../core/types.js';
@@ -206,7 +206,7 @@ function evaluateExpression(expr: string, vars: Record<string, VariableValue>): 
     const args = keys.join(',');
     const fn = new Function('vars', `"use strict"; const { ${args} } = vars; return (${expr});`);
     return !!fn(vars);
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }

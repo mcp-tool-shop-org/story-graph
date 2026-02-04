@@ -1,4 +1,5 @@
 import type { VariableValue } from '../core/types.js';
+import type { Story } from '../core/story.js';
 
 export type RuntimeChoice = {
   id: string;
@@ -38,7 +39,7 @@ export type RuntimeLimits = {
 
 export type RuntimeState = {
   storyId?: string | undefined;
-  story: import('../core/story.js').Story;
+  story: Story;
   currentNodeId: string | null;
   stack: Array<{ returnTo?: string | undefined; includeId: string }>;
   variables: Record<string, VariableValue>;

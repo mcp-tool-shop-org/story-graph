@@ -15,7 +15,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "test": "vitest run --root ../.. -c vitest.config.ts",
-    "lint": "echo 'lint: no-op (eslint config pending)'",
+    "lint": "eslint src --ext .ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [

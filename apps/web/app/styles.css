@@ -422,3 +422,227 @@ h1 {
   background: rgba(52, 211, 153, 0.15);
   color: #34d399;
 }
+
+/* Story Editor Page */
+.editor-loading,
+.editor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px;
+  text-align: center;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editor-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.editor-version {
+  padding: 4px 10px;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 999px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.save-status {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.save-status.saved {
+  color: #34d399;
+}
+
+.save-status.error,
+.save-status.conflict {
+  color: #f87171;
+}
+
+.save-status.saving {
+  color: #60a5fa;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editor-main {
+  min-width: 0;
+}
+
+.editor-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editor-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editor-conflict-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* YAML Editor */
+.yaml-editor-container {
+  width: 100%;
+}
+
+.yaml-editor {
+  width: 100%;
+  min-height: 500px;
+  background: #0b1222;
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.yaml-editor:focus {
+  outline: none;
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+.yaml-editor:read-only {
+  background: rgba(15, 23, 42, 0.5);
+  cursor: not-allowed;
+}
+
+/* Validation Panel */
+.validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.validation-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.validation-status.success {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+}
+
+.validation-status.warning {
+  background: rgba(234, 179, 8, 0.12);
+  color: #facc15;
+}
+
+.validation-status.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.validation-status.validating {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+
+.validation-icon {
+  font-size: 16px;
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.issue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  flex-wrap: wrap;
+}
+
+.issue-item.error {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.issue-item.warning {
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.issue-code {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.issue-message {
+  color: #cbd5e1;
+  flex: 1;
+  min-width: 200px;
+}
+
+.issue-node {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* Button variants */
+.btn-small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-full {
+  width: 100%;
+}

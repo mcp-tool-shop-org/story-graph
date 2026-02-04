@@ -1,49 +1,28 @@
 {
-  "name": "storygraph",
+  "name": "story-graph",
   "version": "0.1.0",
+  "private": true,
   "description": "Visual narrative editor for interactive fiction writers",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "storygraph": "dist/cli/index.js"
-  },
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "lint": "eslint src --ext .ts",
-    "cli": "node --loader ts-node/esm src/cli/index.ts"
-  },
-  "keywords": [
-    "interactive-fiction",
-    "visual-novel",
-    "narrative-design",
-    "storytelling",
-    "twine",
-    "ink",
-    "renpy",
-    "game-writing"
-  ],
-  "author": "mcp-tool-shop <64996768+mcp-tool-shop@users.noreply.github.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mcp-tool-shop-org/storygraph.git"
+    "build": "npm run build -w @storygraph/core && npm run build -w storygraph-cli",
+    "build:core": "npm run build -w @storygraph/core",
+    "build:cli": "npm run build -w storygraph-cli",
+    "build:web": "npm run build -w storygraph-web",
+    "dev:core": "npm run dev -w @storygraph/core",
+    "dev:cli": "npm run dev -w storygraph-cli",
+    "dev:web": "npm run dev -w storygraph-web",
+    "test": "npm run test -w @storygraph/core",
+    "test:run": "npm run test -w @storygraph/core",
+    "typecheck": "npm run typecheck -w @storygraph/core",
+    "lint": "npm run lint -w @storygraph/core"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
-  "dependencies": {
-    "js-yaml": "^4.1.0",
-    "zod": "^3.24.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcp-tool-shop-org/story-graph.git"
   },
-  "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.10.0",
-    "typescript": "^5.7.0",
-    "vitest": "^2.1.0",
-    "ts-node": "^10.9.0"
-  }
+  "license": "MIT"
 }

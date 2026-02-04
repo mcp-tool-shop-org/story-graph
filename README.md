@@ -170,7 +170,7 @@ nodes:
 
 ## Tech Stack
 
-- **Runtime:** Node.js 20+
+- **Runtime:** Node.js 22+
 - **Language:** TypeScript 5+
 - **Desktop:** Tauri 2.0 (Rust backend, web frontend)
 - **UI Framework:** React 19 with Tailwind CSS
@@ -184,9 +184,9 @@ nodes:
 ## Getting Started
 
 ```bash
-# Clone the repository
-git clone https://github.com/mcp-tool-shop-org/storygraph.git
-cd storygraph
+# Clone the repository (workspace layout)
+git clone https://github.com/mcp-tool-shop-org/story-graph.git
+cd story-graph
 
 # Install dependencies
 npm install
@@ -194,8 +194,14 @@ npm install
 # Run tests
 npm test
 
+# Build core and CLI
+npm run build
+
+# Launch web app (Next.js)
+npm run dev:web
+
 # Validate a story file
-npm run cli validate examples/demo.story
+npm exec -w storygraph-cli storygraph validate examples/demo.story
 ```
 
 ---

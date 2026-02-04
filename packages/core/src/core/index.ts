@@ -61,6 +61,14 @@ export {
   type StoryDocument,
 } from './story.js';
 
+// Services
+export {
+  StoryService,
+  type StorySnapshot,
+  type Change,
+  type ChangeSet,
+} from './service.js';
+
 // Serializer
 export {
   ParseError,

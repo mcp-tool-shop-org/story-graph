@@ -333,9 +333,10 @@ export class Validator {
   private getReachableNodes(startId: string): Set<string> {
     const visited = new Set<string>();
     const queue: string[] = [startId];
+    let cursor = 0;
 
-    while (queue.length > 0) {
-      const current = queue.shift()!;
+    while (cursor < queue.length) {
+      const current = queue[cursor++];
       if (visited.has(current)) continue;
       visited.add(current);
 
@@ -360,35 +361,47 @@ export class Validator {
   private detectCycles(): string[][] {
     const cycles: string[][] = [];
     const visited = new Set<string>();
-    const recStack = new Set<string>();
-    const path: string[] = [];
+    const onStack = new Set<string>();
 
-    const dfs = (nodeId: string): void => {
-      visited.add(nodeId);
-      recStack.add(nodeId);
-      path.push(nodeId);
+    for (const startId of this.story.getAllNodeIds()) {
+      if (visited.has(startId)) continue;
 
-      const node = this.story.getNode(nodeId);
-      if (node) {
-        const targets = getNodeTargets(node);
-        for (const target of targets) {
-          if (!visited.has(target)) {
-            dfs(target);
-          } else if (recStack.has(target)) {
-            // Found a cycle
-            const cycleStart = path.indexOf(target);
-            cycles.push([...path.slice(cycleStart), target]);
+      const stack: Array<{ id: string; targets: string[]; index: number }> = [];
+      const startNode = this.story.getNode(startId);
+      const startTargets = startNode ? getNodeTargets(startNode) : [];
+      stack.push({ id: startId, targets: startTargets, index: 0 });
+
+      while (stack.length > 0) {
+        const frame = stack[stack.length - 1];
+
+        if (!visited.has(frame.id)) {
+          visited.add(frame.id);
+        }
+
+        onStack.add(frame.id);
+
+        if (frame.index >= frame.targets.length) {
+          onStack.delete(frame.id);
+          stack.pop();
+          continue;
+        }
+
+        const targetId = frame.targets[frame.index++];
+
+        if (!visited.has(targetId)) {
+          const targetNode = this.story.getNode(targetId);
+          const nextTargets = targetNode ? getNodeTargets(targetNode) : [];
+          stack.push({ id: targetId, targets: nextTargets, index: 0 });
+          continue;
+        }
+
+        if (onStack.has(targetId)) {
+          const cycleStart = stack.findIndex((item) => item.id === targetId);
+          if (cycleStart !== -1) {
+            const cyclePath = stack.slice(cycleStart).map((item) => item.id);
+            cycles.push([...cyclePath, targetId]);
           }
         }
-      }
-
-      path.pop();
-      recStack.delete(nodeId);
-    };
-
-    for (const id of this.story.getAllNodeIds()) {
-      if (!visited.has(id)) {
-        dfs(id);
       }
     }
 

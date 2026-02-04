@@ -15,7 +15,7 @@ import {
   ParseError,
   ValidationError,
   type Issue,
-} from '../core/index.js';
+} from '@storygraph/core';
 
 // =============================================================================
 // CLI Colors (ANSI)

@@ -80,6 +80,12 @@ export class Story {
   /** Cached edges (invalidated on node changes) */
   private edgeCache: Edge[] | null = null;
 
+  /** Cached outgoing edges by node ID */
+  private outgoingCache: Map<NodeId, Edge[]> | null = null;
+
+  /** Cached incoming edges by node ID */
+  private incomingCache: Map<NodeId, Edge[]> | null = null;
+
   constructor(document: StoryDocument) {
     this.version = document.version;
     this.meta = { ...document.meta };
@@ -199,24 +205,24 @@ export class Story {
    * Results are cached for performance.
    */
   getEdges(): Edge[] {
-    if (this.edgeCache === null) {
-      this.edgeCache = extractAllEdges(this.nodes);
-    }
-    return this.edgeCache;
+    this.ensureEdgeCache();
+    return this.edgeCache ?? [];
   }
 
   /**
    * Get edges originating from a specific node.
    */
   getOutgoingEdges(nodeId: NodeId): Edge[] {
-    return this.getEdges().filter((edge) => edge.source === nodeId);
+    this.ensureEdgeCache();
+    return this.outgoingCache?.get(nodeId) ?? [];
   }
 
   /**
    * Get edges targeting a specific node.
    */
   getIncomingEdges(nodeId: NodeId): Edge[] {
-    return this.getEdges().filter((edge) => edge.target === nodeId);
+    this.ensureEdgeCache();
+    return this.incomingCache?.get(nodeId) ?? [];
   }
 
   // ---------------------------------------------------------------------------
@@ -247,6 +253,41 @@ export class Story {
    */
   private invalidateCache(): void {
     this.edgeCache = null;
+    this.outgoingCache = null;
+    this.incomingCache = null;
+  }
+
+  /**
+   * Ensure edge caches are populated.
+   */
+  private ensureEdgeCache(): void {
+    if (this.edgeCache && this.outgoingCache && this.incomingCache) {
+      return;
+    }
+
+    const edges = extractAllEdges(this.nodes);
+    const outgoing = new Map<NodeId, Edge[]>();
+    const incoming = new Map<NodeId, Edge[]>();
+
+    for (const edge of edges) {
+      let fromList = outgoing.get(edge.source);
+      if (!fromList) {
+        fromList = [];
+        outgoing.set(edge.source, fromList);
+      }
+      fromList.push(edge);
+
+      let toList = incoming.get(edge.target);
+      if (!toList) {
+        toList = [];
+        incoming.set(edge.target, toList);
+      }
+      toList.push(edge);
+    }
+
+    this.edgeCache = edges;
+    this.outgoingCache = outgoing;
+    this.incomingCache = incoming;
   }
 
   // ---------------------------------------------------------------------------

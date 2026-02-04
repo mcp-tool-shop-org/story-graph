@@ -1,0 +1,23 @@
+{
+  "name": "storygraph-cli",
+  "version": "0.1.0",
+  "description": "StoryGraph command-line interface",
+  "type": "module",
+  "bin": {
+    "storygraph": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "author": "mcp-tool-shop <64996768+mcp-tool-shop@users.noreply.github.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@storygraph/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.7.0"
+  }
+}

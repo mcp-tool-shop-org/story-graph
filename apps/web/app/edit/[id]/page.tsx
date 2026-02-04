@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { parseToStory, validateStory, type Issue } from '@storygraph/core';
 import { YamlEditor } from '../../../components/YamlEditor';
 import { ValidationPanel } from '../../../components/ValidationPanel';
+import { ValidationStatusBadge } from '../../../components/ValidationStatusBadge';
 
 interface StoryData {
   id: string;
@@ -34,6 +35,12 @@ export default function EditStoryPage() {
 
   const validationRunRef = useRef(0);
   const latestVersionIdRef = useRef<string | null>(null);
+  const validationPanelRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to validation panel when clicking status badge
+  const scrollToValidation = useCallback(() => {
+    validationPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   // Fetch story on mount
   useEffect(() => {
@@ -182,6 +189,11 @@ export default function EditStoryPage() {
           <span className="editor-version">v{story.version}</span>
         </div>
         <div className="editor-header-right">
+          <ValidationStatusBadge
+            issues={issues}
+            parseError={parseError}
+            onClick={scrollToValidation}
+          />
           <span className={`save-status ${saveStatus}`}>
             {saveStatus === 'saving' && 'Saving...'}
             {saveStatus === 'saved' && '✓ Saved'}
@@ -224,7 +236,7 @@ export default function EditStoryPage() {
         </section>
 
         <aside className="editor-sidebar">
-          <div className="panel">
+          <div className="panel" ref={validationPanelRef}>
             <header>
               <h2>Validation</h2>
             </header>

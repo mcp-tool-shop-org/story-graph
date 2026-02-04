@@ -1775,3 +1775,70 @@ h3 {
   flex: 1;
   height: 36px;
 }
+
+/* Validation Status Badge */
+.validation-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.validation-status-badge:hover {
+  transform: translateY(-1px);
+}
+
+.validation-status-badge:active {
+  transform: translateY(0);
+}
+
+.validation-status-badge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0f172a, 0 0 0 4px currentColor;
+}
+
+.validation-status-icon {
+  font-size: 12px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.validation-status-valid {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.validation-status-valid .validation-status-icon {
+  background: rgba(52, 211, 153, 0.25);
+}
+
+.validation-status-warning {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+}
+
+.validation-status-warning .validation-status-icon {
+  background: rgba(234, 179, 8, 0.25);
+}
+
+.validation-status-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.validation-status-error .validation-status-icon {
+  background: rgba(239, 68, 68, 0.25);
+}

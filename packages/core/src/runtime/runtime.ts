@@ -2,7 +2,15 @@ import type { Story } from '../core/story.js';
 import { parseToStory } from '../core/serializer.js';
 import type { StoryNode, Choice } from '../core/nodes.js';
 import type { VariableName, VariableValue } from '../core/types.js';
-import type { RuntimeChoice, RuntimeEvent, RuntimeError, RuntimeFrame, RuntimeLimits, RuntimeState } from './types.js';
+import type {
+  RuntimeChoice,
+  RuntimeEvent,
+  RuntimeError,
+  RuntimeFrame,
+  RuntimeLimits,
+  RuntimeState,
+} from './types.js';
+import { evaluateExpression } from './expression-parser.js';
 
 const DEFAULT_LIMITS: RuntimeLimits = {
   maxAutoSteps: 500,
@@ -72,7 +80,11 @@ export function snapshot(state: RuntimeState): RuntimeSnapshot {
   };
 }
 
-export function hydrate(story: Story, snap: RuntimeSnapshot, options?: RuntimeOptions): RuntimeState {
+export function hydrate(
+  story: Story,
+  snap: RuntimeSnapshot,
+  options?: RuntimeOptions
+): RuntimeState {
   return {
     story,
     storyId: options?.storyId,
@@ -93,7 +105,14 @@ function advance(state: RuntimeState): RuntimeResult {
 
   while (steps++ < max) {
     const node = state.currentNodeId ? state.story.getNode(state.currentNodeId) : undefined;
-    if (!node) return { error: runtimeError('RT001_MISSING_NODE', 'Node not found', state.currentNodeId ?? undefined) };
+    if (!node)
+      return {
+        error: runtimeError(
+          'RT001_MISSING_NODE',
+          'Node not found',
+          state.currentNodeId ?? undefined
+        ),
+      };
 
     const visits = (state.visited[node.id] ?? 0) + 1;
     state.visited[node.id] = visits;
@@ -112,13 +131,23 @@ function advance(state: RuntimeState): RuntimeResult {
       }
       case 'condition': {
         const branch = evaluateExpression(node.expression, state.variables);
-        state.events.push({ code: 'ev_condition', message: `condition ${node.expression} -> ${branch}`, severity: 'info', nodeId: node.id });
+        state.events.push({
+          code: 'ev_condition',
+          message: `condition ${node.expression} -> ${branch}`,
+          severity: 'info',
+          nodeId: node.id,
+        });
         state.currentNodeId = branch ? node.ifTrue : node.ifFalse;
         continue;
       }
       case 'variable': {
         applyVariableMutations(node, state.variables);
-        state.events.push({ code: 'ev_variables', message: 'variables updated', severity: 'info', nodeId: node.id });
+        state.events.push({
+          code: 'ev_variables',
+          message: 'variables updated',
+          severity: 'info',
+          nodeId: node.id,
+        });
         state.currentNodeId = node.next;
         continue;
       }
@@ -129,21 +158,35 @@ function advance(state: RuntimeState): RuntimeResult {
         state.includeDepth += 1;
         state.stack.push({ returnTo: node.return, includeId: node.id });
         const entry = node.entry ?? state.story.getStartNode()?.id;
-        if (!entry) return { error: runtimeError('RT000_NO_START', 'Include missing entry', node.id) };
+        if (!entry)
+          return { error: runtimeError('RT000_NO_START', 'Include missing entry', node.id) };
         state.currentNodeId = entry;
         continue;
       }
       case 'comment': {
-        state.events.push({ code: 'ev_comment', message: 'comment skipped', severity: 'info', nodeId: node.id });
+        state.events.push({
+          code: 'ev_comment',
+          message: 'comment skipped',
+          severity: 'info',
+          nodeId: node.id,
+        });
         const next = state.story.getOutgoingEdges(node.id)[0]?.target;
-        if (!next) return { error: runtimeError('RT005_COMMENT_DEADEND', 'Comment has no outgoing edge', node.id) };
+        if (!next)
+          return {
+            error: runtimeError('RT005_COMMENT_DEADEND', 'Comment has no outgoing edge', node.id),
+          };
         state.currentNodeId = next;
         continue;
       }
       default: {
         // Exhaustiveness check - node.type should be `never` here
         const _exhaustive: never = node;
-        return { error: runtimeError('RT999_UNKNOWN', `Unknown node type: ${(_exhaustive as StoryNode).type}`) };
+        return {
+          error: runtimeError(
+            'RT999_UNKNOWN',
+            `Unknown node type: ${(_exhaustive as StoryNode).type}`
+          ),
+        };
       }
     }
   }
@@ -151,13 +194,16 @@ function advance(state: RuntimeState): RuntimeResult {
   return { error: runtimeError('RT010_STEP_LIMIT', 'Exceeded auto-step limit') };
 }
 
-function buildPassageFrame(state: RuntimeState, node: Extract<StoryNode, { type: 'passage' }>): RuntimeFrame {
+function buildPassageFrame(
+  state: RuntimeState,
+  node: Extract<StoryNode, { type: 'passage' }>
+): RuntimeFrame {
   const choices = (node.choices ?? [])
     .map((choice, idx) => ({ choice, idx }))
     .filter(({ choice }) => isChoiceVisible(choice, state.variables, state.events, node.id))
     .map(({ choice, idx }) => runtimeChoice(choice, idx));
 
-  const ending = (choices.length === 0) || node.ending === true;
+  const ending = choices.length === 0 || node.ending === true;
   if (ending && state.stack.length > 0) {
     const frame = popReturn(state);
     if (frame) return frame;
@@ -173,7 +219,10 @@ function buildPassageFrame(state: RuntimeState, node: Extract<StoryNode, { type:
   };
 }
 
-function buildChoiceFrame(state: RuntimeState, node: Extract<StoryNode, { type: 'choice' }>): RuntimeFrame {
+function buildChoiceFrame(
+  state: RuntimeState,
+  node: Extract<StoryNode, { type: 'choice' }>
+): RuntimeFrame {
   const choices = node.choices.map((choice, idx) => runtimeChoice(choice, idx));
   return {
     nodeId: node.id,
@@ -193,23 +242,26 @@ function runtimeChoice(choice: Choice, idx: number): RuntimeChoice {
   };
 }
 
-function isChoiceVisible(choice: Choice, vars: Record<string, VariableValue>, events: RuntimeEvent[], nodeId: string): boolean {
+function isChoiceVisible(
+  choice: Choice,
+  vars: Record<string, VariableValue>,
+  events: RuntimeEvent[],
+  nodeId: string
+): boolean {
   if (!choice.condition) return true;
   const ok = evaluateExpression(choice.condition, vars);
-  events.push({ code: 'ev_choice_condition', message: `choice condition ${choice.condition} -> ${ok}`, severity: 'info', nodeId });
+  events.push({
+    code: 'ev_choice_condition',
+    message: `choice condition ${choice.condition} -> ${ok}`,
+    severity: 'info',
+    nodeId,
+  });
   return ok;
 }
 
-function evaluateExpression(expr: string, vars: Record<string, VariableValue>): boolean {
-  try {
-    const keys = Object.keys(vars);
-    const args = keys.join(',');
-    const fn = new Function('vars', `"use strict"; const { ${args} } = vars; return (${expr});`);
-    return !!fn(vars);
-  } catch (_err) {
-    return false;
-  }
-}
+// evaluateExpression is now imported from ./expression-parser.js
+// This provides a safe AST-based expression evaluator instead of the
+// previous insecure new Function() implementation
 
 function applyVariableMutations(
   node: Extract<StoryNode, { type: 'variable' }>,
@@ -245,7 +297,15 @@ function popReturn(state: RuntimeState): RuntimeFrame | null {
       choices: [],
       ending: true,
       variables: { ...state.variables },
-      events: [...state.events, { code: 'ev_include_return', message: 'include completed', severity: 'info', nodeId: frame.includeId }],
+      events: [
+        ...state.events,
+        {
+          code: 'ev_include_return',
+          message: 'include completed',
+          severity: 'info',
+          nodeId: frame.includeId,
+        },
+      ],
     };
   }
   state.currentNodeId = frame.returnTo;

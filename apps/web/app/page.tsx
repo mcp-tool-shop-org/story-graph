@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Story } from '@storygraph/core';
 import { parseToStory, validateStory, type Issue, type StoryNode } from '@storygraph/core';
 import { StoryList } from '../components/StoryList';
@@ -33,6 +34,7 @@ type ParsedStory = {
 type TabId = 'stories' | 'editor';
 
 export default function Page() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>('stories');
   const [yaml, setYaml] = useState(SAMPLE_STORY);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -42,6 +44,11 @@ export default function Page() {
     key: '',
     layout: { nodes: [], edges: [] },
   });
+
+  // Handle demo story navigation
+  const handleOpenDemo = useCallback(() => {
+    router.push('/play/demo');
+  }, [router]);
 
   useEffect(() => {
     const runId = ++runIdRef.current;
@@ -133,7 +140,7 @@ export default function Page() {
       </nav>
 
       {activeTab === 'stories' && (
-        <StoryList onCreateStory={handleCreateStory} onOpenDemo={() => setActiveTab('editor')} />
+        <StoryList onCreateStory={handleCreateStory} onOpenDemo={handleOpenDemo} />
       )}
 
       {activeTab === 'editor' && (

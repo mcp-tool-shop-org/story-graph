@@ -6,7 +6,7 @@ export type {
   RuntimeLimits,
   RuntimeState,
 } from './types.js';
-export type { RuntimeOptions, RuntimeResult, RuntimeSnapshot } from './runtime.js';
+export type { RuntimeOptions, RuntimeResult, RuntimeSnapshot, RuntimeSaveData } from './runtime.js';
 export {
   createRuntime,
   loadRuntimeFromContent,
@@ -14,6 +14,10 @@ export {
   choose,
   snapshot,
   hydrate,
+  saveGame,
+  loadGame,
+  serializeSaveData,
+  deserializeSaveData,
 } from './runtime.js';
 export {
   evaluateExpression,

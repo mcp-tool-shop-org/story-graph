@@ -60,6 +60,7 @@ export function choose(state: RuntimeState, targetNodeId: string): RuntimeResult
 }
 
 export type RuntimeResult = { frame?: RuntimeFrame; error?: RuntimeError };
+
 export type RuntimeSnapshot = {
   currentNodeId: string | null;
   stack: Array<{ returnTo?: string | undefined; includeId: string }>;
@@ -67,6 +68,32 @@ export type RuntimeSnapshot = {
   visited: Record<string, number>;
   includeDepth: number;
   limits: RuntimeLimits;
+};
+
+/**
+ * Complete save data for game state serialization.
+ * This is the format used for saveGame() and loadGame().
+ */
+export type RuntimeSaveData = {
+  /** Save format version for future compatibility */
+  version: '1.0';
+  /** Story ID this save is for (for validation) */
+  storyId?: string | undefined;
+  /** Timestamp when the save was created */
+  savedAt: string;
+  /** Human-readable save name (optional) */
+  saveName?: string | undefined;
+  /** The runtime snapshot */
+  snapshot: RuntimeSnapshot;
+  /** Optional metadata about the save */
+  metadata?: {
+    /** Story title at time of save */
+    storyTitle?: string | undefined;
+    /** Current node ID for display */
+    currentNodeId?: string | undefined;
+    /** Play time in milliseconds (if tracked) */
+    playTimeMs?: number | undefined;
+  };
 };
 
 export function snapshot(state: RuntimeState): RuntimeSnapshot {
@@ -96,6 +123,132 @@ export function hydrate(
     limits: { ...DEFAULT_LIMITS, ...(options ?? {}), ...(snap.limits ?? {}) },
     events: [],
   };
+}
+
+/**
+ * Save the current game state to a JSON-serializable format.
+ *
+ * @param state - The runtime state to save
+ * @param options - Optional save metadata
+ * @returns A RuntimeSaveData object that can be serialized to JSON
+ *
+ * @example
+ * ```ts
+ * const saveData = saveGame(state, { saveName: 'Quick Save' });
+ * localStorage.setItem('save1', JSON.stringify(saveData));
+ * ```
+ */
+export function saveGame(
+  state: RuntimeState,
+  options?: { saveName?: string; playTimeMs?: number }
+): RuntimeSaveData {
+  return {
+    version: '1.0',
+    storyId: state.storyId,
+    savedAt: new Date().toISOString(),
+    saveName: options?.saveName,
+    snapshot: snapshot(state),
+    metadata: {
+      storyTitle: state.story.meta.title,
+      currentNodeId: state.currentNodeId ?? undefined,
+      playTimeMs: options?.playTimeMs,
+    },
+  };
+}
+
+/**
+ * Load a game state from saved data.
+ *
+ * @param story - The story to use (must match the saved storyId if present)
+ * @param saveData - The saved game data
+ * @param options - Optional runtime options
+ * @returns A RuntimeState ready to continue playing, or an error
+ *
+ * @example
+ * ```ts
+ * const saveData = JSON.parse(localStorage.getItem('save1')!);
+ * const result = loadGame(story, saveData);
+ * if (result.state) {
+ *   // Continue playing from saved state
+ *   const frame = advance(result.state);
+ * }
+ * ```
+ */
+export function loadGame(
+  story: Story,
+  saveData: RuntimeSaveData,
+  options?: RuntimeOptions
+): { state?: RuntimeState; error?: RuntimeError } {
+  // Validate save format version
+  if (saveData.version !== '1.0') {
+    return {
+      error: runtimeError(
+        'RT020_INVALID_SAVE',
+        `Unsupported save format version: ${saveData.version}`
+      ),
+    };
+  }
+
+  // Validate story ID if present
+  if (saveData.storyId && options?.storyId && saveData.storyId !== options.storyId) {
+    return {
+      error: runtimeError(
+        'RT021_STORY_MISMATCH',
+        `Save is for story "${saveData.storyId}" but trying to load into "${options.storyId}"`
+      ),
+    };
+  }
+
+  // Validate current node exists in story
+  if (saveData.snapshot.currentNodeId && !story.hasNode(saveData.snapshot.currentNodeId)) {
+    return {
+      error: runtimeError(
+        'RT022_MISSING_NODE',
+        `Saved node "${saveData.snapshot.currentNodeId}" not found in story (story may have been modified)`
+      ),
+    };
+  }
+
+  // Validate stack nodes exist
+  for (const frame of saveData.snapshot.stack) {
+    if (frame.returnTo && !story.hasNode(frame.returnTo)) {
+      return {
+        error: runtimeError(
+          'RT022_MISSING_NODE',
+          `Return node "${frame.returnTo}" not found in story`
+        ),
+      };
+    }
+  }
+
+  const state = hydrate(story, saveData.snapshot, options);
+  return { state };
+}
+
+/**
+ * Serialize save data to a JSON string.
+ * This is a convenience function for common use cases.
+ */
+export function serializeSaveData(saveData: RuntimeSaveData): string {
+  return JSON.stringify(saveData);
+}
+
+/**
+ * Deserialize save data from a JSON string.
+ * This is a convenience function for common use cases.
+ *
+ * @throws Error if the JSON is invalid or doesn't match RuntimeSaveData structure
+ */
+export function deserializeSaveData(json: string): RuntimeSaveData {
+  const data = JSON.parse(json) as RuntimeSaveData;
+  // Basic structural validation
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid save data: not an object');
+  }
+  if (!data.version || !data.savedAt || !data.snapshot) {
+    throw new Error('Invalid save data: missing required fields');
+  }
+  return data;
 }
 
 function advance(state: RuntimeState): RuntimeResult {

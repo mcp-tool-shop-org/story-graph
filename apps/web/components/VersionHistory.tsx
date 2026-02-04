@@ -112,7 +112,7 @@ export function VersionHistory({ storyId, currentVersionId, onRevert }: VersionH
     return (
       <div className="version-history-loading">
         <div className="spinner" />
-        <span>Loading version history...</span>
+        <span>Gathering your story's history...</span>
       </div>
     );
   }
@@ -182,7 +182,7 @@ export function VersionHistory({ storyId, currentVersionId, onRevert }: VersionH
 
       {versions.length === 0 && (
         <div className="version-history-empty">
-          <span className="muted">No version history available.</span>
+          <span className="muted">No history yet — start editing to create versions!</span>
         </div>
       )}
     </div>

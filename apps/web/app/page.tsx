@@ -76,7 +76,7 @@ export default function Page() {
   // Handle create story
   const handleCreateStory = useCallback(() => {
     // TODO: Implement full create story flow with API
-    alert('Create story coming soon! For now, use the Editor Demo tab.');
+    alert('Coming soon! For now, try the Editor Demo tab to experiment with YAML stories.');
   }, []);
 
   // Keyboard shortcut for create story (Ctrl+N / Cmd+N)
@@ -129,13 +129,13 @@ export default function Page() {
           className={`nav-tab ${activeTab === 'stories' ? 'active' : ''}`}
           onClick={() => setActiveTab('stories')}
         >
-          My Stories
+          Your Stories
         </button>
         <button
           className={`nav-tab ${activeTab === 'editor' ? 'active' : ''}`}
           onClick={() => setActiveTab('editor')}
         >
-          Editor Demo
+          Playground
         </button>
       </nav>
 
@@ -149,7 +149,7 @@ export default function Page() {
             <section className="panel">
               <header>
                 <h2>YAML Editor</h2>
-                <span className="muted">Live-validated against core schemas</span>
+                <span className="muted">Edit and watch validation happen in real time</span>
               </header>
               <textarea
                 value={yaml}
@@ -162,12 +162,14 @@ export default function Page() {
             <section className="panel">
               <header>
                 <h2>Validation</h2>
-                <span className="muted">Parse + structural checks</span>
+                <span className="muted">We'll catch any issues</span>
               </header>
               {parsed.parseError ? (
-                <div className="alert error">{parsed.parseError}</div>
+                <div className="alert error">
+                  Hmm, that doesn't look quite right: {parsed.parseError}
+                </div>
               ) : parsed.issues.length === 0 ? (
-                <div className="alert success">No issues found.</div>
+                <div className="alert success">All good! Your story is valid.</div>
               ) : (
                 <ul className="issues">
                   {parsed.issues.map((issue) => (
@@ -186,15 +188,15 @@ export default function Page() {
             <section className="panel">
               <header>
                 <h2>Nodes</h2>
-                <span className="muted">Filter and jump</span>
+                <span className="muted">Your story building blocks</span>
               </header>
               <NodeList nodes={nodes} selectedId={selectedNodeId} onSelect={setSelectedNodeId} />
             </section>
 
             <section className="panel">
               <header>
-                <h2>Graph Map</h2>
-                <span className="muted">Read-only layout from start</span>
+                <h2>Story Map</h2>
+                <span className="muted">See how your story branches</span>
               </header>
               <GraphMap
                 layout={mapLayout}
@@ -318,7 +320,7 @@ function GraphMap({
   onSelect: (id: string) => void;
 }) {
   if (layout.nodes.length === 0) {
-    return <div className="muted">No nodes to display.</div>;
+    return <div className="muted">Add some nodes to see them here!</div>;
   }
 
   return (

@@ -119,28 +119,29 @@ export function StorySettings({
           </button>
         </div>
         <p className="settings-hint">
-          The title is also stored in the YAML meta section. Changing it here will update both.
+          This also updates the title in your YAML — we keep them in sync.
         </p>
       </section>
 
       <section className="settings-section">
         <h3>Fork Story</h3>
         <p className="settings-description">
-          Create a copy of this story with a new ID. The forked story will start fresh with version
-          1 and its own version history.
+          Want to experiment without changing the original? Fork creates a fresh copy you can modify
+          freely.
         </p>
         <button onClick={handleFork} disabled={isForking} className="btn btn-secondary">
-          {isForking ? 'Creating fork...' : 'Fork Story'}
+          {isForking ? 'Creating your copy...' : 'Create a Fork'}
         </button>
       </section>
 
       <section className="settings-section settings-danger">
         <h3>Danger Zone</h3>
         <p className="settings-description">
-          Once you delete a story, there is no going back. Please be certain.
+          Deleting is permanent — all versions and history will be gone forever. No pressure, but
+          make sure you're certain.
         </p>
         <button onClick={() => setShowDeleteModal(true)} className="btn btn-danger">
-          Delete Story
+          Delete This Story
         </button>
       </section>
 

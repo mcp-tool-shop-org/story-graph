@@ -196,10 +196,10 @@ export default function EditStoryPage() {
           />
           <span className={`save-status ${saveStatus}`}>
             {saveStatus === 'saving' && 'Saving...'}
-            {saveStatus === 'saved' && '✓ Saved'}
-            {saveStatus === 'error' && '✗ Save failed'}
-            {saveStatus === 'conflict' && '⚠ Version conflict'}
-            {saveStatus === 'idle' && hasChanges && 'Unsaved changes'}
+            {saveStatus === 'saved' && '✓ All saved!'}
+            {saveStatus === 'error' && '✗ Could not save'}
+            {saveStatus === 'conflict' && '⚠ Someone else edited this'}
+            {saveStatus === 'idle' && hasChanges && 'You have unsaved changes'}
           </span>
           <button
             onClick={handleSave}
@@ -216,10 +216,10 @@ export default function EditStoryPage() {
 
       {saveStatus === 'conflict' && (
         <div className="alert error editor-conflict-alert">
-          <strong>Version Conflict:</strong> Someone else modified this story. Please refresh to get
-          the latest version, then reapply your changes.
+          <strong>Heads up!</strong> Someone else edited this story while you were working. Refresh
+          to see their changes, then you can re-apply yours.
           <button onClick={() => window.location.reload()} className="btn btn-secondary btn-small">
-            Refresh
+            Refresh Now
           </button>
         </div>
       )}
@@ -229,7 +229,7 @@ export default function EditStoryPage() {
           <div className="panel">
             <header>
               <h2>YAML Editor</h2>
-              <span className="muted">Ctrl+S to save</span>
+              <span className="muted">Press Ctrl+S to save your work</span>
             </header>
             <YamlEditor value={content} onChange={setContent} />
           </div>

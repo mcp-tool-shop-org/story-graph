@@ -217,12 +217,11 @@ export default function DemoPlayPage() {
             <div className="play-start panel">
               <h2>The Enchanted Forest</h2>
               <p className="muted" style={{ margin: '16px 0' }}>
-                A demo story showcasing StoryGraph features: branching paths, variables, conditions,
-                and multiple endings.
+                Experience what StoryGraph can do — branching paths, variables, conditions, and
+                multiple endings all working together.
               </p>
               <p className="text-subtle text-sm" style={{ margin: '16px 0' }}>
-                Your choices shape the story. Will you find courage, wisdom, or perhaps both on your
-                journey?
+                Every choice you make shapes your journey. Ready to see where your story leads?
               </p>
               <button onClick={startGame} className="btn btn-primary btn-large">
                 Begin Your Adventure

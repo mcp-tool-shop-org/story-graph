@@ -78,7 +78,7 @@ export function ValidationPanel({
       {!hasIssues && (
         <div className="alert success">
           <span className="validation-icon">✓</span>
-          No issues found. Story is valid!
+          Looking good! Your story is ready to play.
         </div>
       )}
     </div>

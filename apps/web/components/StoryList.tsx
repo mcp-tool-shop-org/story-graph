@@ -74,16 +74,16 @@ export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryLi
   return (
     <div className="story-list-container">
       <div className="story-list-header">
-        <h2>My Stories</h2>
+        <h2>Your Stories</h2>
         <button onClick={handleRefresh} className="btn btn-secondary" disabled={loading}>
-          {loading ? 'Loading...' : 'Refresh'}
+          {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
       <form onSubmit={handleSearch} className="story-list-filters">
         <input
           type="search"
-          placeholder="Search stories..."
+          placeholder="Find a story..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
@@ -107,13 +107,13 @@ export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryLi
 
       {error && (
         <div className="alert error">
-          {error}
+          Oops! {error}. Let's try that again.
           <button
             onClick={handleRefresh}
             className="btn btn-secondary"
             style={{ marginLeft: '8px' }}
           >
-            Retry
+            Try Again
           </button>
         </div>
       )}
@@ -129,26 +129,26 @@ export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryLi
       {!loading && !error && stories.length === 0 && (
         <div className="story-list-empty">
           {searchQuery ? (
-            <p className="muted">No stories found matching "{searchQuery}"</p>
+            <p className="muted">No stories match "{searchQuery}" — try a different search?</p>
           ) : (
             <div className="empty-state">
-              <div className="empty-state-icon">📖</div>
-              <h3 className="empty-state-title">Start Your First Story</h3>
+              <div className="empty-state-icon">✨</div>
+              <h3 className="empty-state-title">No stories yet? Let's fix that.</h3>
               <p className="empty-state-description">
-                Stories in StoryGraph are written in YAML and validated in real time.
+                Your interactive stories live here. Write branching narratives with choices,
                 <br />
-                Create branching narratives with choices, variables, and conditions.
+                track variables, and watch your tale unfold.
               </p>
               <div className="empty-state-actions">
                 <button onClick={onCreateStory} className="btn btn-primary btn-large">
-                  Create Your First Story
+                  Write Your First Story
                 </button>
                 <button onClick={onOpenDemo} className="btn btn-secondary btn-large">
-                  Explore Demo Story
+                  Play the Demo
                 </button>
               </div>
               <p className="empty-state-hint">
-                Or press <kbd>Ctrl</kbd>+<kbd>N</kbd> to create a new story anytime
+                Pro tip: Press <kbd>Ctrl</kbd>+<kbd>N</kbd> anytime to start fresh
               </p>
             </div>
           )}

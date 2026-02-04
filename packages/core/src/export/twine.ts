@@ -24,16 +24,24 @@ export function exportTwine(story: Story, options: TwineExportOptions = {}): Exp
   const passages: PassageOut[] = [];
   const tier = options.tier ?? 0;
 
-  const allNodes = story.getAllNodes();
+  const allNodes = [...story.getAllNodes()].sort((a, b) => a.id.localeCompare(b.id));
+
+  const start = story.getStartNode();
+  if (!start) {
+    addWarning(warnings, {
+      code: 'TWN001',
+      message: 'No start passage found; Twine export has no explicit entrypoint',
+    });
+  }
 
   // Build passages
   for (const node of allNodes) {
     switch (node.type) {
       case 'passage':
-        passages.push(toPassage(node));
+        passages.push(toPassage(node, warnings));
         break;
       case 'choice':
-        passages.push(choiceToPassage(node));
+        passages.push(choiceToPassage(node, warnings));
         break;
       case 'condition':
         addWarning(warnings, {
@@ -71,7 +79,16 @@ export function exportTwine(story: Story, options: TwineExportOptions = {}): Exp
 
   // Serialize to Twee (very small subset)
   const storyTitle = options.storyTitle ?? story.meta.title ?? 'StoryGraph Export';
-  const twee = buildTwee(storyTitle, passages);
+  const sortedPassages = passages.sort((a, b) => a.name.localeCompare(b.name));
+  const collision = findNameCollision(sortedPassages);
+  if (collision) {
+    addWarning(warnings, {
+      code: 'TWN003',
+      message: `Passage name collision after normalization: ${collision}`,
+    });
+  }
+
+  const twee = buildTwee(storyTitle, sortedPassages);
 
   if (tier > 0 && warnings.length === 0) {
     addWarning(warnings, {
@@ -91,12 +108,13 @@ export function exportTwine(story: Story, options: TwineExportOptions = {}): Exp
   };
 }
 
-function toPassage(node: Extract<StoryNode, { type: 'passage' }>): PassageOut {
+function toPassage(node: Extract<StoryNode, { type: 'passage' }>, warnings: ExportWarning[]): PassageOut {
   const lines: string[] = [];
   lines.push(node.content);
   if (node.choices) {
     for (const choice of node.choices) {
-      lines.push(`[[${choice.text}|${choice.target}]]`);
+      const escaped = escapeLinkText(choice.text, warnings, node.id);
+      lines.push(`[[${escaped}|${choice.target}]]`);
     }
   }
   return {
@@ -105,13 +123,14 @@ function toPassage(node: Extract<StoryNode, { type: 'passage' }>): PassageOut {
   };
 }
 
-function choiceToPassage(node: Extract<StoryNode, { type: 'choice' }>): PassageOut {
+function choiceToPassage(node: Extract<StoryNode, { type: 'choice' }>, warnings: ExportWarning[]): PassageOut {
   const lines: string[] = [];
   if (node.prompt) {
     lines.push(node.prompt);
   }
   for (const choice of node.choices) {
-    lines.push(`[[${choice.text}|${choice.target}]]`);
+    const escaped = escapeLinkText(choice.text, warnings, node.id);
+    lines.push(`[[${escaped}|${choice.target}]]`);
   }
   return {
     name: node.id,
@@ -149,4 +168,26 @@ ${title}
     .join('\n\n');
 
   return `${header}\n${body}\n`;
+}
+
+function escapeLinkText(text: string, warnings: ExportWarning[], nodeId: string): string {
+  const escaped = text.replace(/([\[\]|])/g, '\\$1');
+  if (escaped !== text) {
+    addWarning(warnings, {
+      code: 'TWN002',
+      message: `Link text escaped for Twine compatibility in node '${nodeId}'`,
+      nodeId,
+    });
+  }
+  return escaped;
+}
+
+function findNameCollision(passages: PassageOut[]): string | null {
+  const seen = new Set<string>();
+  for (const p of passages) {
+    const key = p.name.toLowerCase();
+    if (seen.has(key)) return p.name;
+    seen.add(key);
+  }
+  return null;
 }

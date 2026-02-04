@@ -21,6 +21,9 @@ Warning codes are stable identifiers shared across exporters. Format: `EXP###`.
 - EXP007: Formatting/markup stripped.
 - EXP008: Attachment or media omitted.
 - EXP009: Unknown node type skipped.
+- TWN001: Twine export missing start passage.
+- TWN002: Twine link text normalized/escaped.
+- TWN003: Twine passage name collision after normalization.
 
 Exporters MAY extend this list; new codes SHOULD be documented.
 

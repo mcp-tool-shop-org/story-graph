@@ -15,6 +15,8 @@ export interface StoryVersion {
   createdAt: string;
 }
 
+const MAX_VERSIONS = 50;
+
 class StoryStore {
   private stories = new Map<string, StoryRecord>();
   private versions = new Map<string, StoryVersion[]>();
@@ -61,6 +63,10 @@ class StoryStore {
     this.stories.set(id, updated);
     const history = this.versions.get(id) ?? [];
     history.push({ version: nextVersion, content, createdAt: now });
+    history.push({ version: nextVersion, content, createdAt: now });
+    if (history.length > MAX_VERSIONS) {
+      history.splice(0, history.length - MAX_VERSIONS);
+    }
     this.versions.set(id, history);
     return updated;
   }

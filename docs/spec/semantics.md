@@ -62,6 +62,11 @@ These are not part of v0.1 and exporters MAY refuse or degrade them.
 - Exporters MUST assume deterministic evaluation: given the same input state, the same path is taken.
 - Variable nodes with no mutations SHOULD be treated as no-ops and reported as warnings.
 
+### Normative vs heuristic checks
+
+- Normative (MUST/SHOULD): entrypoint existence, reference integrity, determinism expectations, ordered state mutations, reachability checks.
+- Heuristic (MAY warn): effectful-looking conditions, variable nodes that perform no state changes, include-without-return, cycles without exits. These are guidance, not hard errors, and exporters MAY choose stricter handling.
+
 ## Future Work (tracked)
 
 - Formal cycle validity rules (see graph invariants document).

@@ -103,6 +103,7 @@ export class Validator {
     this.checkEmptyContent();
     this.checkCycles();
     this.checkChoiceConditions();
+    this.checkStateAndSideEffects();
 
     const end = performance.now();
 
@@ -204,6 +205,8 @@ export class Validator {
    */
   private checkDeadEnds(): void {
     const passages = this.story.getNodesByType('passage');
+    const choices = this.story.getNodesByType('choice');
+    const includes = this.story.getNodesByType('include');
 
     for (const passage of passages) {
       const hasChoices = passage.choices && passage.choices.length > 0;
@@ -216,6 +219,32 @@ export class Validator {
           category: 'structure',
           message: `Passage '${passage.id}' has no choices and is not marked as ending`,
           nodeId: passage.id,
+        });
+      }
+    }
+
+    for (const choice of choices) {
+      const hasChoices = choice.choices && choice.choices.length > 0;
+      if (!hasChoices) {
+        this.addIssue({
+          code: 'CHOICE_WITHOUT_OPTIONS',
+          severity: 'error',
+          category: 'structure',
+          message: `Choice node '${choice.id}' has no options`,
+          nodeId: choice.id,
+        });
+      }
+    }
+
+    for (const include of includes) {
+      const hasReturn = Boolean(include.return);
+      if (!hasReturn) {
+        this.addIssue({
+          code: 'INCLUDE_NO_RETURN',
+          severity: 'warning',
+          category: 'structure',
+          message: `Include node '${include.id}' has no return target and may dead-end`,
+          nodeId: include.id,
         });
       }
     }
@@ -266,14 +295,26 @@ export class Validator {
   private checkCycles(): void {
     const cycles = this.detectCycles();
 
-    if (cycles.length > 0) {
-      this.addIssue({
-        code: 'CYCLE_DETECTED',
-        severity: 'info',
-        category: 'structure',
-        message: `Story contains ${cycles.length} cycle(s). This is often intentional.`,
-        details: { cycles: cycles.slice(0, 5) }, // Limit to first 5
-      });
+    for (const cycle of cycles) {
+      const classification = this.classifyCycle(cycle);
+
+      if (!classification.hasExit) {
+        this.addIssue({
+          code: 'NON_TERMINATING_CYCLE',
+          severity: 'warning',
+          category: 'structure',
+          message: `Cycle has no exit and may never terminate: ${cycle.join(' -> ')}`,
+          details: { cycle },
+        });
+      } else {
+        this.addIssue({
+          code: 'CYCLE_DETECTED',
+          severity: 'info',
+          category: 'structure',
+          message: `Cycle detected with exit edges: ${cycle.join(' -> ')}`,
+          details: { cycle },
+        });
+      }
     }
   }
 
@@ -314,6 +355,67 @@ export class Validator {
         }
       }
     }
+  }
+
+  /**
+   * Check for state-related issues and side effects.
+   */
+  private checkStateAndSideEffects(): void {
+    const variableNodes = this.story.getNodesByType('variable');
+
+    for (const variable of variableNodes) {
+      const hasSet = variable.set && Object.keys(variable.set).length > 0;
+      const hasInc = variable.increment && Object.keys(variable.increment).length > 0;
+      const hasDec = variable.decrement && Object.keys(variable.decrement).length > 0;
+
+      if (!hasSet && !hasInc && !hasDec) {
+        this.addIssue({
+          code: 'NO_STATE_CHANGE',
+          severity: 'warning',
+          category: 'best-practice',
+          message: `Variable node '${variable.id}' performs no state changes`,
+          nodeId: variable.id,
+        });
+      }
+
+      if (!variable.next) {
+        this.addIssue({
+          code: 'VARIABLE_NO_NEXT',
+          severity: 'warning',
+          category: 'structure',
+          message: `Variable node '${variable.id}' has no next target`,
+          nodeId: variable.id,
+        });
+      }
+    }
+
+    // Flag suspicious (potentially effectful) condition expressions
+    for (const node of this.story.getAllNodes()) {
+      if (node.type === 'condition') {
+        if (this.looksEffectful(node.expression)) {
+          this.addIssue({
+            code: 'EFFECTFUL_CONDITION',
+            severity: 'warning',
+            category: 'best-practice',
+            message: `Condition '${node.id}' appears to have side effects: ${node.expression}`,
+            nodeId: node.id,
+            details: { expression: node.expression },
+          });
+        }
+      }
+    }
+  }
+
+  private looksEffectful(expression: string): boolean {
+    const trimmed = expression.trim();
+    if (trimmed.length === 0) return false;
+
+    // Heuristics: assignments, increment/decrement, function calls with parentheses and no operators
+    const assignmentPattern = /(^|[^=!<>])=([^=]|$)/;
+    const incDecPattern = /\+\+|--/;
+    const funcCallPattern = /[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)/;
+
+    return assignmentPattern.test(trimmed) || incDecPattern.test(trimmed) || funcCallPattern.test(trimmed);
   }
 
   // ---------------------------------------------------------------------------
@@ -406,6 +508,24 @@ export class Validator {
     }
 
     return cycles;
+  }
+
+  /**
+   * Classify a cycle to determine whether it has an exit edge.
+   */
+  private classifyCycle(cycle: string[]): { hasExit: boolean } {
+    const cycleSet = new Set(cycle);
+
+    for (const nodeId of cycleSet) {
+      const outgoing = this.story.getOutgoingEdges(nodeId);
+      for (const edge of outgoing) {
+        if (!cycleSet.has(edge.target)) {
+          return { hasExit: true };
+        }
+      }
+    }
+
+    return { hasExit: false };
   }
 
   /**

@@ -101,7 +101,15 @@ export default function Page(): JSX.Element {
         </button>
       </nav>
 
-      {activeTab === 'stories' && <StoryList />}
+      {activeTab === 'stories' && (
+        <StoryList
+          onCreateStory={() => {
+            // TODO: Implement create story flow
+            alert('Create story coming soon! For now, use the Editor Demo tab.');
+          }}
+          onOpenDemo={() => setActiveTab('editor')}
+        />
+      )}
 
       {activeTab === 'editor' && (
         <>

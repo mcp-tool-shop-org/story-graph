@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { StoryCard, type StoryCardData } from './StoryCard';
 
+interface StoryListProps {
+  initialStories?: StoryCardData[];
+  onCreateStory?: () => void;
+  onOpenDemo?: () => void;
+}
+
 interface StoryListResponse {
   stories: StoryCardData[];
   total: number;
@@ -10,11 +16,7 @@ interface StoryListResponse {
   offset: number;
 }
 
-interface StoryListProps {
-  initialStories?: StoryCardData[];
-}
-
-export function StoryList({ initialStories }: StoryListProps) {
+export function StoryList({ initialStories, onCreateStory, onOpenDemo }: StoryListProps) {
   const [stories, setStories] = useState<StoryCardData[]>(initialStories ?? []);
   const [loading, setLoading] = useState(!initialStories);
   const [error, setError] = useState<string | null>(null);
@@ -125,11 +127,30 @@ export function StoryList({ initialStories }: StoryListProps) {
 
       {!loading && !error && stories.length === 0 && (
         <div className="story-list-empty">
-          <p className="muted">
-            {searchQuery
-              ? `No stories found matching "${searchQuery}"`
-              : "You haven't created any stories yet."}
-          </p>
+          {searchQuery ? (
+            <p className="muted">No stories found matching "{searchQuery}"</p>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-icon">📖</div>
+              <h3 className="empty-state-title">Start Your First Story</h3>
+              <p className="empty-state-description">
+                Stories in StoryGraph are written in YAML and validated in real time.
+                <br />
+                Create branching narratives with choices, variables, and conditions.
+              </p>
+              <div className="empty-state-actions">
+                <button onClick={onCreateStory} className="btn btn-primary btn-large">
+                  Create Your First Story
+                </button>
+                <button onClick={onOpenDemo} className="btn btn-secondary btn-large">
+                  Explore Demo Story
+                </button>
+              </div>
+              <p className="empty-state-hint">
+                Or press <kbd>Ctrl</kbd>+<kbd>N</kbd> to create a new story anytime
+              </p>
+            </div>
+          )}
         </div>
       )}
 

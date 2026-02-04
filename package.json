@@ -29,7 +29,8 @@
     "lint:fix": "eslint \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\" --fix",
     "format": "prettier --write \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"packages/*/src/**/*.ts\" \"apps/*/lib/**/*.ts\" \"apps/*/app/**/*.{ts,tsx}\"",
-    "health": "npm run typecheck && npm test && npm run build"
+    "health": "npm run typecheck && npm test && npm run build",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -37,6 +38,8 @@
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.4.0",
     "vite": "^6.1.7",
     "vitest": "^4.0.18"
